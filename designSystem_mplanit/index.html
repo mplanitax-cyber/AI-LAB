@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mplanit Design System — Token Preview</title>
+  <link rel="stylesheet" href="./theme.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-base);
+      background: var(--color-mp-gray-08);
+      color: var(--color-font-primary);
+      padding: var(--spacing-40);
+    }
+
+    /* ── 공통 레이아웃 ── */
+    .page-header {
+      margin-bottom: var(--spacing-64);
+    }
+    .page-header h1 {
+      font-size: var(--font-size-title-page-sm);
+      font-weight: var(--font-weight-title-page);
+      color: var(--color-mp-azure-01);
+      margin-bottom: var(--spacing-8);
+    }
+    .page-header p {
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular);
+      color: var(--color-font-tertiary);
+    }
+
+    .section {
+      margin-bottom: var(--spacing-64);
+    }
+    .section-title {
+      font-size: var(--font-size-heading-md);
+      font-weight: var(--font-weight-heading);
+      color: var(--color-font-primary);
+      padding-bottom: var(--spacing-12);
+      border-bottom: 2px solid var(--color-mp-azure-01);
+      margin-bottom: var(--spacing-24);
+    }
+    .section-subtitle {
+      font-size: var(--font-size-subheading-sm);
+      font-weight: var(--font-weight-subheading);
+      color: var(--color-font-tertiary);
+      margin-bottom: var(--spacing-12);
+      margin-top: var(--spacing-24);
+    }
+
+    /* ── 컬러 카드 ── */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--spacing-12);
+    }
+    .color-card {
+      border-radius: var(--radius-8);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 1px 4px var(--color-black-15);
+    }
+    .color-swatch {
+      height: 64px;
+      width: 100%;
+    }
+    .color-info {
+      padding: var(--spacing-8) var(--spacing-12);
+    }
+    .color-name {
+      font-size: 11px;
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-primary);
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+    .color-hex {
+      font-size: 11px;
+      color: var(--color-font-tertiary);
+      margin-bottom: 2px;
+      font-family: monospace;
+    }
+    .color-desc {
+      font-size: 10px;
+      color: var(--color-mp-gray-05);
+    }
+
+    /* ── 클라이언트 배지 ── */
+    .client-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: var(--font-weight-body-strong);
+      padding: var(--spacing-4) var(--spacing-12);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--spacing-16);
+    }
+    .badge-mp  { background: var(--color-mp-azure-01); color: #fff; }
+    .badge-aia { background: var(--color-aia-red);     color: #fff; }
+    .badge-hg  { background: var(--color-hg-magenta);  color: #fff; }
+
+    /* ── 타이포그래피 ── */
+    .typo-table { width: 100%; border-collapse: collapse; }
+    .typo-table th {
+      text-align: left;
+      font-size: var(--font-size-body-sm);
+      color: var(--color-font-tertiary);
+      padding: var(--spacing-8) var(--spacing-12);
+      border-bottom: 1px solid var(--color-mp-gray-07);
+      background: var(--color-mp-gray-08);
+    }
+    .typo-table td {
+      padding: var(--spacing-12) var(--spacing-12);
+      border-bottom: 1px solid var(--color-mp-gray-07);
+      vertical-align: middle;
+    }
+    .typo-table tr:last-child td { border-bottom: none; }
+    .typo-meta {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-font-tertiary);
+      white-space: nowrap;
+    }
+    .typo-token {
+      font-size: 11px;
+      color: var(--color-mp-blue-05);
+      font-family: monospace;
+    }
+
+    /* ── 스페이싱 ── */
+    .spacing-list { display: flex; flex-direction: column; gap: var(--spacing-8); }
+    .spacing-row { display: flex; align-items: center; gap: var(--spacing-16); }
+    .spacing-label {
+      font-size: var(--font-size-body-sm);
+      font-family: monospace;
+      color: var(--color-font-tertiary);
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .spacing-bar {
+      height: 20px;
+      background: var(--color-mp-azure-01);
+      border-radius: var(--radius-4);
+      opacity: 0.75;
+    }
+    .spacing-val {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-mp-gray-05);
+      white-space: nowrap;
+    }
+
+    /* ── Border Radius ── */
+    .radius-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-24);
+      align-items: flex-end;
+    }
+    .radius-item { text-align: center; }
+    .radius-box {
+      width: 80px;
+      height: 80px;
+      background: var(--color-mp-azure-02);
+      margin-bottom: var(--spacing-8);
+    }
+    .radius-label {
+      font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-primary);
+    }
+    .radius-token {
+      font-size: 11px;
+      color: var(--color-mp-blue-05);
+      font-family: monospace;
+    }
+
+    /* ── 구분선 ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--color-mp-gray-07);
+      margin: var(--spacing-32) 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="page-header">
+    <h1>Mplanit Design System</h1>
+    <p>Token Preview — theme.css 기반 실제 CSS 변수 시각화</p>
+  </header>
+
+
+  <!-- ════════════════════════════════════════
+       섹션 1. 엠플랜잇 컬러
+  ════════════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">컬러 팔레트</h2>
+
+    <!-- 엠플랜잇 -->
+    <span class="client-badge badge-mp">엠플랜잇 (Mplanit)</span>
+
+    <p class="section-subtitle">Brand Colors</p>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-azure-01)"></div>
+        <div class="color-info">
+          <div class="color-name">mp-azure-01</div>
+          <div class="color-hex">#19448C</div>
+          <div class="color-desc">메인 브랜드 (Primary)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-azure-02)"></div>
+        <div class="color-info">
+          <div class="color-name">mp-azure-02</div>
+          <div class="color-hex">#379BC1</div>
+          <div class="color-desc">보조 브랜드</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-subtitle">Blue Scale</p>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-01)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-01</div><div class="color-hex">#143162</div><div class="color-desc">딥 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-02)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-02</div><div class="color-hex">#064EC8</div><div class="color-desc">블루 강조</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-03)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-03</div><div class="color-hex">#19448C</div><div class="color-desc">Azure 동일값</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-04)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-04</div><div class="color-hex">#379BC1</div><div class="color-desc">미디엄 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-05)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-05</div><div class="color-hex">#2576C1</div><div class="color-desc">블루 변형</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-06)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-06</div><div class="color-hex">#4797D6</div><div class="color-desc">라이트 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-07)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-07</div><div class="color-hex">#45BBE9</div><div class="color-desc">스카이 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-08)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-08</div><div class="color-hex">#19448CB2</div><div class="color-desc">블루 70% opacity</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-09)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-09</div><div class="color-hex">#8AA4CA</div><div class="color-desc">페일 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-10)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-10</div><div class="color-hex">#ABD1FE</div><div class="color-desc">라이트 페일 블루</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-mp-blue-11)"></div>
+        <div class="color-info"><div class="color-name">mp-blue-11</div><div class="color-hex">#D0E1F0</div><div class="color-desc">아주 연한 블루</div></div>
+      </div>
+    </div>
+
+    <p class="section-subtitle">Font Colors</p>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-font-primary)"></div>
+        <div class="color-info"><div class="color-name">font-primary</div><div class="color-hex">#111111</div><div class="color-desc">메인 텍스트</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-font-secondary)"></div>
+        <div class="color-info"><div class="color-name">font-secondary</div><div class="color-hex">#2A2A2A</div><div class="color-desc">보조 텍스트</div></div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--color-font-tertiary)"></div>
+        <div class="color-info"><div class="color-name">font-tertiary</div><div class="color-hex">#5A5A5A</div><div class="color-desc">3차 텍스트</div></div>
+      </div>
+    </div>
+
+    <p class="section-subtitle">Gray Scale</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-01)"></div><div class="color-info"><div class="color-name">mp-gray-01</div><div class="color-hex">#111111</div><div class="color-desc">가장 어두운 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-02)"></div><div class="color-info"><div class="color-name">mp-gray-02</div><div class="color-hex">#2A2A2A</div><div class="color-desc">다크 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-03)"></div><div class="color-info"><div class="color-name">mp-gray-03</div><div class="color-hex">#171717CC</div><div class="color-desc">다크 그레이 80%</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-04)"></div><div class="color-info"><div class="color-name">mp-gray-04</div><div class="color-hex">#5A5A5A</div><div class="color-desc">미디엄 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-05)"></div><div class="color-info"><div class="color-name">mp-gray-05</div><div class="color-hex">#7C7C7C</div><div class="color-desc">그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-06)"></div><div class="color-info"><div class="color-name">mp-gray-06</div><div class="color-hex">#E9F0F2</div><div class="color-desc">라이트 블루 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-07)"></div><div class="color-info"><div class="color-name">mp-gray-07</div><div class="color-hex">#DFDFDF</div><div class="color-desc">라이트 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-08)"></div><div class="color-info"><div class="color-name">mp-gray-08</div><div class="color-hex">#F8F9FA</div><div class="color-desc">아주 연한 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-09)"></div><div class="color-info"><div class="color-name">mp-gray-09</div><div class="color-hex">#CCCCCC</div><div class="color-desc">연한 그레이</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-10)"></div><div class="color-info"><div class="color-name">mp-gray-10</div><div class="color-hex">#F1F0EF</div><div class="color-desc">웜 라이트 그레이</div></div></div>
+    </div>
+
+    <p class="section-subtitle">Black / White Alpha</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-black-100)"></div><div class="color-info"><div class="color-name">black-100</div><div class="color-hex">#000000</div><div class="color-desc">순수 블랙</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-black-90)"></div><div class="color-info"><div class="color-name">black-90</div><div class="color-hex">#000000E5</div><div class="color-desc">블랙 90%</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-black-15); border:1px solid var(--color-mp-gray-07)"></div><div class="color-info"><div class="color-name">black-15</div><div class="color-hex">#00000026</div><div class="color-desc">블랙 15% (오버레이)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-black-01); border:1px solid var(--color-mp-gray-07)"></div><div class="color-info"><div class="color-name">black-01</div><div class="color-hex">#00000003</div><div class="color-desc">블랙 1%</div></div></div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- AIA -->
+    <span class="client-badge badge-aia">AIA생명</span>
+
+    <p class="section-subtitle">Brand Colors</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-red)"></div><div class="color-info"><div class="color-name">aia-red</div><div class="color-hex">#D31145</div><div class="color-desc">AIA 메인 레드</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-red-50)"></div><div class="color-info"><div class="color-name">aia-red-50</div><div class="color-hex">#D3114580</div><div class="color-desc">AIA 레드 50%</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown)"></div><div class="color-info"><div class="color-name">aia-brown</div><div class="color-hex">#5E1D1D</div><div class="color-desc">AIA 브라운</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-gray)"></div><div class="color-info"><div class="color-name">aia-gray</div><div class="color-hex">#545454</div><div class="color-desc">AIA 그레이</div></div></div>
+    </div>
+
+    <p class="section-subtitle">Secondary Colors</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-purple-01)"></div><div class="color-info"><div class="color-name">aia-purple-01</div><div class="color-hex">#9D1A5A</div><div class="color-desc">퍼플</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-01)"></div><div class="color-info"><div class="color-name">aia-pink-01</div><div class="color-hex">#F67F87</div><div class="color-desc">핑크 01</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-02)"></div><div class="color-info"><div class="color-name">aia-pink-02</div><div class="color-hex">#EF8AA9</div><div class="color-desc">핑크 02</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-03)"></div><div class="color-info"><div class="color-name">aia-pink-03</div><div class="color-hex">#FFBFD1</div><div class="color-desc">핑크 03</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-04)"></div><div class="color-info"><div class="color-name">aia-pink-04</div><div class="color-hex">#FDEAEA</div><div class="color-desc">핑크 04 (배경)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown-01)"></div><div class="color-info"><div class="color-name">aia-brown-01</div><div class="color-hex">#541828</div><div class="color-desc">딥 브라운</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown-02)"></div><div class="color-info"><div class="color-name">aia-brown-02</div><div class="color-hex">#E8D2C1</div><div class="color-desc">라이트 브라운</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown-03)"></div><div class="color-info"><div class="color-name">aia-brown-03</div><div class="color-hex">#F4E3D6</div><div class="color-desc">페일 브라운</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown-04)"></div><div class="color-info"><div class="color-name">aia-brown-04</div><div class="color-hex">#FFF7E0</div><div class="color-desc">크림 (배경)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-blue-01)"></div><div class="color-info"><div class="color-name">aia-blue-01</div><div class="color-hex">#DCD9E8</div><div class="color-desc">블루 (배경)</div></div></div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- 흥국화재 -->
+    <span class="client-badge badge-hg">흥국화재</span>
+
+    <p class="section-subtitle">Brand Colors</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta)"></div><div class="color-info"><div class="color-name">hg-magenta</div><div class="color-hex">#EC008C</div><div class="color-desc">흥국 메인 마젠타</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple)"></div><div class="color-info"><div class="color-name">hg-purple</div><div class="color-hex">#351B6F</div><div class="color-desc">흥국 퍼플</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue)"></div><div class="color-info"><div class="color-name">hg-blue</div><div class="color-hex">#0074E7</div><div class="color-desc">흥국 블루</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-gray)"></div><div class="color-info"><div class="color-name">hg-gray</div><div class="color-hex">#B3BBC0</div><div class="color-desc">흥국 그레이</div></div></div>
+    </div>
+
+    <p class="section-subtitle">Secondary Colors</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-01)"></div><div class="color-info"><div class="color-name">hg-magenta-01</div><div class="color-hex">#BD0070</div><div class="color-desc">마젠타 다크</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-02)"></div><div class="color-info"><div class="color-name">hg-magenta-02</div><div class="color-hex">#E4499F</div><div class="color-desc">마젠타 미드</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-03)"></div><div class="color-info"><div class="color-name">hg-magenta-03</div><div class="color-hex">#FFEAF6</div><div class="color-desc">마젠타 라이트</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-04)"></div><div class="color-info"><div class="color-name">hg-magenta-04</div><div class="color-hex">#FEF2F9</div><div class="color-desc">마젠타 페일</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple-01)"></div><div class="color-info"><div class="color-name">hg-purple-01</div><div class="color-hex">#5A3AAE</div><div class="color-desc">퍼플 01</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple-02)"></div><div class="color-info"><div class="color-name">hg-purple-02</div><div class="color-hex">#6948C1</div><div class="color-desc">퍼플 02</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple-03)"></div><div class="color-info"><div class="color-name">hg-purple-03</div><div class="color-hex">#8560B6</div><div class="color-desc">퍼플 03</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple-04)"></div><div class="color-info"><div class="color-name">hg-purple-04</div><div class="color-hex">#F5F1FD</div><div class="color-desc">퍼플 페일</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-01)"></div><div class="color-info"><div class="color-name">hg-blue-01</div><div class="color-hex">#0096EB</div><div class="color-desc">블루 01</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-02)"></div><div class="color-info"><div class="color-name">hg-blue-02</div><div class="color-hex">#3BB6D8</div><div class="color-desc">블루 02</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-03)"></div><div class="color-info"><div class="color-name">hg-blue-03</div><div class="color-hex">#C3DBFD</div><div class="color-desc">블루 03</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-04)"></div><div class="color-info"><div class="color-name">hg-blue-04</div><div class="color-hex">#DAF5FF</div><div class="color-desc">블루 04</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-05)"></div><div class="color-info"><div class="color-name">hg-blue-05</div><div class="color-hex">#EEF4FE</div><div class="color-desc">블루 05</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue-06)"></div><div class="color-info"><div class="color-name">hg-blue-06</div><div class="color-hex">#EDF9FF</div><div class="color-desc">블루 페일</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-yellow-01)"></div><div class="color-info"><div class="color-name">hg-yellow-01</div><div class="color-hex">#FFC600</div><div class="color-desc">옐로우</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-yellow-02)"></div><div class="color-info"><div class="color-name">hg-yellow-02</div><div class="color-hex">#FFF7E0</div><div class="color-desc">옐로우 페일</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-green-01)"></div><div class="color-info"><div class="color-name">hg-green-01</div><div class="color-hex">#58C9C3</div><div class="color-desc">그린</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-green-02)"></div><div class="color-info"><div class="color-name">hg-green-02</div><div class="color-hex">#E5FFFE</div><div class="color-desc">그린 페일</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-green-03)"></div><div class="color-info"><div class="color-name">hg-green-03</div><div class="color-hex">#EAFCFF</div><div class="color-desc">그린 아주 연함</div></div></div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       섹션 2. 타이포그래피
+  ════════════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">타이포그래피 스케일</h2>
+
+    <table class="typo-table">
+      <thead>
+        <tr>
+          <th style="width:220px">토큰</th>
+          <th style="width:130px">Size / Weight</th>
+          <th>미리보기</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Title Hero -->
+        <tr>
+          <td>
+            <div class="typo-token">--font-size-title-hero</div>
+          </td>
+          <td><span class="typo-meta">72px / 700</span></td>
+          <td style="font-size:var(--font-size-title-hero); font-weight:var(--font-weight-title-hero); line-height:1; overflow:hidden;">Title Hero</td>
+        </tr>
+        <!-- Title Page -->
+        <tr>
+          <td><div class="typo-token">--font-size-title-page-lg</div></td>
+          <td><span class="typo-meta">64px / 700</span></td>
+          <td style="font-size:var(--font-size-title-page-lg); font-weight:var(--font-weight-title-page); line-height:1.1;">Title Page LG</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-title-page-md</div></td>
+          <td><span class="typo-meta">48px / 700</span></td>
+          <td style="font-size:var(--font-size-title-page-md); font-weight:var(--font-weight-title-page); line-height:1.1;">Title Page MD</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-title-page-sm</div></td>
+          <td><span class="typo-meta">40px / 700</span></td>
+          <td style="font-size:var(--font-size-title-page-sm); font-weight:var(--font-weight-title-page); line-height:1.1;">Title Page SM</td>
+        </tr>
+        <!-- Subtitle -->
+        <tr>
+          <td><div class="typo-token">--font-size-subtitle-lg</div></td>
+          <td><span class="typo-meta">40px / 500</span></td>
+          <td style="font-size:var(--font-size-subtitle-lg); font-weight:var(--font-weight-subtitle);">Subtitle LG</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-subtitle-md</div></td>
+          <td><span class="typo-meta">32px / 500</span></td>
+          <td style="font-size:var(--font-size-subtitle-md); font-weight:var(--font-weight-subtitle);">Subtitle MD</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-subtitle-sm</div></td>
+          <td><span class="typo-meta">24px / 500</span></td>
+          <td style="font-size:var(--font-size-subtitle-sm); font-weight:var(--font-weight-subtitle);">Subtitle SM</td>
+        </tr>
+        <!-- Heading -->
+        <tr>
+          <td><div class="typo-token">--font-size-heading-lg</div></td>
+          <td><span class="typo-meta">32px / 600</span></td>
+          <td style="font-size:var(--font-size-heading-lg); font-weight:var(--font-weight-heading);">Heading LG</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-heading-md</div></td>
+          <td><span class="typo-meta">24px / 600</span></td>
+          <td style="font-size:var(--font-size-heading-md); font-weight:var(--font-weight-heading);">Heading MD</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-heading-sm</div></td>
+          <td><span class="typo-meta">20px / 600</span></td>
+          <td style="font-size:var(--font-size-heading-sm); font-weight:var(--font-weight-heading);">Heading SM</td>
+        </tr>
+        <!-- Subheading -->
+        <tr>
+          <td><div class="typo-token">--font-size-subheading-lg</div></td>
+          <td><span class="typo-meta">24px / 500</span></td>
+          <td style="font-size:var(--font-size-subheading-lg); font-weight:var(--font-weight-subheading);">Subheading LG</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-subheading-md</div></td>
+          <td><span class="typo-meta">20px / 500</span></td>
+          <td style="font-size:var(--font-size-subheading-md); font-weight:var(--font-weight-subheading);">Subheading MD</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-subheading-sm</div></td>
+          <td><span class="typo-meta">16px / 500</span></td>
+          <td style="font-size:var(--font-size-subheading-sm); font-weight:var(--font-weight-subheading);">Subheading SM</td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td><div class="typo-token">--font-size-body-lg (regular)</div></td>
+          <td><span class="typo-meta">20px / 500</span></td>
+          <td style="font-size:var(--font-size-body-lg); font-weight:var(--font-weight-body-regular);">Body LG Regular — 본문 텍스트 샘플입니다.</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-body-lg (strong)</div></td>
+          <td><span class="typo-meta">20px / 700</span></td>
+          <td style="font-size:var(--font-size-body-lg); font-weight:var(--font-weight-body-strong);">Body LG Strong — 강조 텍스트 샘플입니다.</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-body-md (regular)</div></td>
+          <td><span class="typo-meta">16px / 500</span></td>
+          <td style="font-size:var(--font-size-body-md); font-weight:var(--font-weight-body-regular);">Body MD Regular — 본문 텍스트 샘플입니다.</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-body-md (strong)</div></td>
+          <td><span class="typo-meta">16px / 700</span></td>
+          <td style="font-size:var(--font-size-body-md); font-weight:var(--font-weight-body-strong);">Body MD Strong — 강조 텍스트 샘플입니다.</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-body-sm (regular)</div></td>
+          <td><span class="typo-meta">14px / 500</span></td>
+          <td style="font-size:var(--font-size-body-sm); font-weight:var(--font-weight-body-regular);">Body SM Regular — 보조 텍스트 샘플입니다.</td>
+        </tr>
+        <tr>
+          <td><div class="typo-token">--font-size-body-sm (strong)</div></td>
+          <td><span class="typo-meta">14px / 700</span></td>
+          <td style="font-size:var(--font-size-body-sm); font-weight:var(--font-weight-body-strong);">Body SM Strong — 강조 텍스트 샘플입니다.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       섹션 3. 스페이싱
+  ════════════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">스페이싱 토큰</h2>
+    <div class="spacing-list">
+      <div class="spacing-row"><span class="spacing-label">--spacing-0 (Space/0)</span><div class="spacing-bar" style="width:var(--spacing-0); min-width:2px; opacity:0.2"></div><span class="spacing-val">0px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-2 (Space/50)</span><div class="spacing-bar" style="width:var(--spacing-2)"></div><span class="spacing-val">2px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-4 (Space/100)</span><div class="spacing-bar" style="width:var(--spacing-4)"></div><span class="spacing-val">4px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-6 (Space/150)</span><div class="spacing-bar" style="width:var(--spacing-6)"></div><span class="spacing-val">6px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-8 (Space/200)</span><div class="spacing-bar" style="width:var(--spacing-8)"></div><span class="spacing-val">8px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-12 (Space/250)</span><div class="spacing-bar" style="width:var(--spacing-12)"></div><span class="spacing-val">12px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-16 (Space/300)</span><div class="spacing-bar" style="width:var(--spacing-16)"></div><span class="spacing-val">16px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-18 (Space/350)</span><div class="spacing-bar" style="width:var(--spacing-18)"></div><span class="spacing-val">18px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-20 (Space/400)</span><div class="spacing-bar" style="width:var(--spacing-20)"></div><span class="spacing-val">20px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-24 (Space/500)</span><div class="spacing-bar" style="width:var(--spacing-24)"></div><span class="spacing-val">24px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-28 (Space/600)</span><div class="spacing-bar" style="width:var(--spacing-28)"></div><span class="spacing-val">28px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-30 (Space/650)</span><div class="spacing-bar" style="width:var(--spacing-30)"></div><span class="spacing-val">30px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-32 (Space/700)</span><div class="spacing-bar" style="width:var(--spacing-32)"></div><span class="spacing-val">32px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-34 (Space/750)</span><div class="spacing-bar" style="width:var(--spacing-34)"></div><span class="spacing-val">34px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-36 (Space/800)</span><div class="spacing-bar" style="width:var(--spacing-36)"></div><span class="spacing-val">36px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-40 (Space/900)</span><div class="spacing-bar" style="width:var(--spacing-40)"></div><span class="spacing-val">40px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-42 (Space/950)</span><div class="spacing-bar" style="width:var(--spacing-42)"></div><span class="spacing-val">42px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-48 (Space/1050)</span><div class="spacing-bar" style="width:var(--spacing-48)"></div><span class="spacing-val">48px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-50 (Space/1100)</span><div class="spacing-bar" style="width:var(--spacing-50)"></div><span class="spacing-val">50px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-64 (Space/1600)</span><div class="spacing-bar" style="width:var(--spacing-64)"></div><span class="spacing-val">64px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-96 (Space/2400)</span><div class="spacing-bar" style="width:var(--spacing-96)"></div><span class="spacing-val">96px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-160 (Space/4000)</span><div class="spacing-bar" style="width:var(--spacing-160)"></div><span class="spacing-val">160px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--spacing-360 (Desktop Margin)</span><div class="spacing-bar" style="width:var(--spacing-360)"></div><span class="spacing-val">360px</span></div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       섹션 4. Border Radius
+  ════════════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">Border Radius</h2>
+    <div class="radius-grid">
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-2)"></div>
+        <div class="radius-label">radius-2</div>
+        <div class="radius-token">--radius-2 · 2px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-4)"></div>
+        <div class="radius-label">radius-4</div>
+        <div class="radius-token">--radius-4 · 4px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-8)"></div>
+        <div class="radius-label">radius-8</div>
+        <div class="radius-token">--radius-8 · 8px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-16)"></div>
+        <div class="radius-label">radius-16</div>
+        <div class="radius-token">--radius-16 · 16px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-20)"></div>
+        <div class="radius-label">radius-20</div>
+        <div class="radius-token">--radius-20 · 20px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-30)"></div>
+        <div class="radius-label">radius-30</div>
+        <div class="radius-token">--radius-30 · 30px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:var(--radius-full)"></div>
+        <div class="radius-label">radius-full</div>
+        <div class="radius-token">--radius-full · 9999px</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

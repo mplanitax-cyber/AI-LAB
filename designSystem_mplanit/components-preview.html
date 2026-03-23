@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mplanit — Components Preview</title>
+  <link rel="stylesheet" href="./theme.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-base);
+      background: var(--color-mp-gray-08);
+      color: var(--color-font-primary);
+      min-height: 100vh;
+    }
+
+    /* ════ 페이지 헤더 ════ */
+    .page-header {
+      background: var(--color-mp-azure-01);
+      padding: var(--spacing-24) var(--spacing-40);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-16);
+    }
+    .page-header h1 {
+      font-size: var(--font-size-heading-sm);
+      font-weight: var(--font-weight-heading);
+      color: white;
+    }
+    .page-header span {
+      font-size: var(--font-size-body-sm);
+      color: rgba(255,255,255,0.6);
+      font-weight: var(--font-weight-body-regular);
+    }
+
+    /* ════ 탭 네비게이션 ════ */
+    .tab-nav {
+      background: white;
+      border-bottom: 1px solid var(--color-mp-gray-07);
+      padding: 0 var(--spacing-40);
+      display: flex;
+      gap: var(--spacing-4);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .tab-btn {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular);
+      color: var(--color-font-tertiary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: var(--spacing-16) var(--spacing-20);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--color-font-secondary); }
+    .tab-btn.active {
+      color: var(--color-mp-azure-01);
+      font-weight: var(--font-weight-body-strong);
+      border-bottom-color: var(--color-mp-azure-01);
+    }
+
+    /* ════ 탭 콘텐츠 ════ */
+    .tab-panel { display: none; padding: var(--spacing-40); }
+    .tab-panel.active { display: block; }
+
+    /* ════ 공통 레이아웃 ════ */
+    .section { margin-bottom: var(--spacing-64); }
+    .section-title {
+      font-size: var(--font-size-heading-md);
+      font-weight: var(--font-weight-heading);
+      color: var(--color-font-primary);
+      padding-bottom: var(--spacing-12);
+      border-bottom: 2px solid var(--color-mp-azure-01);
+      margin-bottom: var(--spacing-24);
+    }
+    .section-sub {
+      font-size: var(--font-size-subheading-sm);
+      font-weight: var(--font-weight-subheading);
+      color: var(--color-font-tertiary);
+      margin-bottom: var(--spacing-16);
+      margin-top: var(--spacing-28);
+    }
+    .preview-card {
+      background: white;
+      border-radius: var(--radius-16);
+      padding: var(--spacing-32);
+      margin-bottom: var(--spacing-24);
+      border: 1px solid var(--color-mp-gray-07);
+    }
+    .preview-card-dark {
+      background: var(--color-mp-gray-01);
+      border-radius: var(--radius-16);
+      padding: var(--spacing-32);
+      margin-bottom: var(--spacing-24);
+    }
+    .preview-label {
+      font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-tertiary);
+      margin-bottom: var(--spacing-16);
+      font-family: monospace;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--spacing-16);
+    }
+    .col { display: flex; flex-direction: column; gap: var(--spacing-16); }
+    .divider { border: none; border-top: 1px solid var(--color-mp-gray-07); margin: var(--spacing-32) 0; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--font-weight-body-strong);
+      padding: var(--spacing-4) var(--spacing-8);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--spacing-16);
+    }
+    .badge-mp  { background: var(--color-mp-azure-01); color: white; }
+    .badge-aia { background: var(--color-aia-red);     color: white; }
+    .badge-hg  { background: var(--color-hg-magenta);  color: white; }
+
+    /* ════ 색상 카드 (Overview) ════ */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: var(--spacing-12);
+    }
+    .color-card { border-radius: var(--radius-8); overflow: hidden; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .color-swatch { height: 56px; }
+    .color-info { padding: var(--spacing-8) var(--spacing-12); }
+    .color-name { font-size: 11px; font-weight: var(--font-weight-body-strong); color: var(--color-font-primary); margin-bottom: 2px; word-break: break-all; }
+    .color-hex  { font-size: 10px; color: var(--color-font-tertiary); font-family: monospace; }
+
+    /* ════ 타이포그래피 (Overview) ════ */
+    .typo-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--spacing-24);
+      padding: var(--spacing-16) 0;
+      border-bottom: 1px solid var(--color-mp-gray-07);
+    }
+    .typo-row:last-child { border-bottom: none; }
+    .typo-meta { width: 220px; flex-shrink: 0; font-size: 11px; color: var(--color-font-tertiary); font-family: monospace; }
+
+    /* ════ BUTTON 컴포넌트 재현 ════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: var(--spacing-8); font-family: var(--font-family-base);
+      font-weight: var(--font-weight-body-strong); border: none;
+      border-radius: var(--radius-full); cursor: pointer;
+      white-space: nowrap; line-height: 1; transition: opacity 0.15s;
+    }
+    .btn-sm  { height: var(--spacing-36); padding: 0 var(--spacing-16); font-size: var(--font-size-body-sm); }
+    .btn-md  { height: var(--spacing-48); padding: 0 var(--spacing-24); font-size: var(--font-size-body-md); }
+    .btn-lg  { height: var(--spacing-64); padding: 0 var(--spacing-32); font-size: var(--font-size-body-md); }
+    .btn-primary   { background: var(--color-mp-azure-01); color: white; }
+    .btn-secondary { background: transparent; color: var(--color-mp-azure-01); border: 1.5px solid var(--color-mp-azure-01); }
+    .btn-neutral   { background: var(--color-mp-gray-01);  color: white; }
+    .btn-txt       { background: transparent; color: var(--color-mp-azure-01); border: none; padding: 0; height: auto; font-weight: var(--font-weight-body-regular); }
+    .btn-arrow     { background: transparent; color: var(--color-mp-azure-01); border: none; padding: 0; height: auto; }
+    .btn-cta       { background: var(--color-mp-azure-01); color: white; width: 100%; border-radius: var(--radius-16); }
+    .btn-disabled  { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    .size-table { width: 100%; border-collapse: collapse; }
+    .size-table th {
+      text-align: left; font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong); color: var(--color-font-tertiary);
+      padding: var(--spacing-12); border-bottom: 1px solid var(--color-mp-gray-07);
+      background: var(--color-mp-gray-08);
+    }
+    .size-table td { padding: var(--spacing-16) var(--spacing-12); border-bottom: 1px solid var(--color-mp-gray-07); vertical-align: middle; }
+    .size-table tr:last-child td { border-bottom: none; }
+    .variant-label { font-size: 11px; font-family: monospace; color: var(--color-font-tertiary); }
+
+    /* ════ HEADER 컴포넌트 재현 ════ */
+    .header-demo {
+      border-radius: var(--radius-8);
+      overflow: hidden;
+      border: 1px solid var(--color-mp-gray-07);
+      margin-bottom: var(--spacing-24);
+    }
+    .h-bar {
+      width: 100%; display: flex; align-items: center;
+      justify-content: space-between; gap: var(--spacing-24);
+      height: var(--spacing-64); padding: 0 var(--spacing-32);
+      background: white; border-bottom: 1px solid var(--color-mp-gray-07);
+      box-sizing: border-box;
+    }
+    .h-left  { display: flex; align-items: center; gap: var(--spacing-32); }
+    .h-logo  { font-size: var(--font-size-heading-sm); font-weight: var(--font-weight-heading); line-height: 1; }
+    .h-nav   { display: flex; gap: var(--spacing-24); }
+    .h-nav a { font-size: var(--font-size-body-md); font-weight: var(--font-weight-body-regular); color: var(--color-font-tertiary); text-decoration: none; }
+    .h-nav a.active { font-weight: var(--font-weight-body-strong); }
+    .h-right { display: flex; align-items: center; gap: var(--spacing-16); }
+    .h-cta {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: var(--spacing-36); padding: 0 var(--spacing-20);
+      font-family: var(--font-family-base); font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong); color: white;
+      border: none; border-radius: var(--radius-full); cursor: pointer;
+    }
+    .h-hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
+    .h-hamburger span { display: block; width: 20px; height: 2px; background: var(--color-mp-gray-05); border-radius: var(--radius-2); }
+    /* 모바일 드롭다운 */
+    .h-mobile-menu {
+      background: white; padding: var(--spacing-16) var(--spacing-32);
+      display: flex; flex-direction: column; gap: 0;
+      border-top: 1px solid var(--color-mp-gray-07);
+    }
+    .h-mobile-menu a {
+      display: block; padding: var(--spacing-12) 0;
+      font-size: var(--font-size-body-md); text-decoration: none;
+      color: var(--color-font-tertiary);
+      border-bottom: 1px solid var(--color-mp-gray-07);
+    }
+    .h-mobile-menu a:last-child { border-bottom: none; }
+
+    /* ════ TEXTFIELD 컴포넌트 재현 ════ */
+    .tf-wrap  { display: flex; flex-direction: column; gap: var(--spacing-4); width: 100%; }
+    .tf-field {
+      position: relative; display: flex; align-items: center;
+      gap: var(--spacing-8); padding: 0 var(--spacing-16);
+      background: var(--color-mp-gray-06);
+      border-radius: var(--radius-8) var(--radius-8) 0 0;
+      border-bottom: 2px solid var(--color-mp-gray-07);
+      box-sizing: border-box;
+    }
+    .tf-field-sm { height: var(--spacing-48); }
+    .tf-field-md { height: var(--spacing-64); }
+    .tf-field-lg { height: var(--spacing-96); }
+    .tf-label {
+      position: absolute; left: var(--spacing-16); pointer-events: none;
+      font-family: var(--font-family-base); transition: all 0.15s;
+    }
+    .tf-label-float {
+      top: var(--spacing-6); font-size: 11px;
+      font-weight: var(--font-weight-body-regular); color: var(--color-font-tertiary);
+    }
+    .tf-label-placeholder {
+      top: 50%; transform: translateY(-50%);
+      font-size: var(--font-size-body-md); color: var(--color-font-tertiary);
+    }
+    .tf-input {
+      flex: 1; height: 100%; padding-top: var(--spacing-20);
+      border: none; outline: none; background: transparent;
+      font-family: var(--font-family-base); font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular); color: var(--color-font-secondary);
+      width: 100%;
+    }
+    .tf-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tf-helper { font-family: var(--font-family-base); font-size: var(--font-size-body-sm); padding-left: var(--spacing-16); color: var(--color-font-tertiary); }
+    /* 상태별 border */
+    .tf-focus   { border-bottom-color: var(--color-mp-azure-01); }
+    .tf-error   { border-bottom-color: var(--color-aia-red); }
+    .tf-success { border-bottom-color: var(--color-hg-green-01); }
+    .tf-disabled { opacity: 0.4; pointer-events: none; background: var(--color-mp-gray-06); }
+    .tf-readonly { background: var(--color-mp-gray-08); }
+    .tf-label-focus   { color: var(--color-mp-azure-01) !important; }
+    .tf-helper-error   { color: var(--color-aia-red); }
+    .tf-helper-success { color: var(--color-hg-green-01); }
+
+    .tf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-24);
+    }
+    .tf-case { display: flex; flex-direction: column; gap: var(--spacing-8); }
+    .tf-case-label {
+      font-size: 11px; font-family: monospace;
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-tertiary); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ════ FOOTER 컴포넌트 재현 ════ */
+    .footer-demo { border-radius: var(--radius-8); overflow: hidden; margin-bottom: var(--spacing-32); }
+    .ft-top { width: 100%; background: var(--color-mp-gray-02); }
+    .ft-top-inner {
+      padding: 0 var(--spacing-32); height: var(--spacing-64);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-24);
+    }
+    .ft-left { display: flex; align-items: center; gap: var(--spacing-32); }
+    .ft-logo { font-size: var(--font-size-heading-sm); font-weight: var(--font-weight-heading); text-decoration: none; }
+    .ft-nav  { display: flex; gap: var(--spacing-24); }
+    .ft-nav a { font-size: var(--font-size-body-sm); color: var(--color-mp-gray-05); text-decoration: none; }
+    .ft-cta {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: var(--spacing-36); padding: 0 var(--spacing-20);
+      font-family: var(--font-family-base); font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong); color: white;
+      background: transparent; border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius-full); cursor: pointer; white-space: nowrap;
+    }
+    .ft-divider-white { width: 100%; height: 1px; background: rgba(255,255,255,0.2); }
+    .ft-mid { background: var(--color-mp-gray-04); padding: var(--spacing-32); }
+    .ft-cols { display: flex; gap: var(--spacing-40); }
+    .ft-col { flex: 1; }
+    .ft-col-title { font-size: var(--font-size-body-sm); font-weight: var(--font-weight-body-strong); color: white; margin-bottom: var(--spacing-12); }
+    .ft-col a { display: block; font-size: var(--font-size-body-sm); color: rgba(255,255,255,0.6); text-decoration: none; margin-bottom: var(--spacing-8); }
+    .ft-social { display: flex; gap: var(--spacing-12); margin-top: var(--spacing-4); }
+    .ft-social-icon {
+      width: var(--spacing-36); height: var(--spacing-36);
+      border-radius: var(--radius-full); background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .ft-social-icon svg { width: 16px; height: 16px; }
+    .ft-divider-gray { width: 100%; height: 1px; background: var(--color-mp-gray-05); opacity: 0.4; }
+    .ft-bottom { background: var(--color-mp-gray-04); padding: 0 var(--spacing-32); height: var(--spacing-48); display: flex; align-items: center; justify-content: space-between; }
+    .ft-copyright { font-size: var(--font-size-body-sm); color: rgba(255,255,255,0.4); }
+    .ft-legal { display: flex; gap: var(--spacing-20); }
+    .ft-legal a { font-size: var(--font-size-body-sm); color: rgba(255,255,255,0.4); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ── 페이지 헤더 ── -->
+  <header class="page-header">
+    <h1>Mplanit Design System</h1>
+    <span>Components Preview</span>
+  </header>
+
+  <!-- ── 탭 네비게이션 ── -->
+  <nav class="tab-nav" role="tablist" aria-label="컴포넌트 탭">
+    <!-- 탭 추가 시 여기에 버튼만 추가 -->
+    <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="tab-overview"   data-tab="overview">Overview</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-button"     data-tab="button">Button</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-header"     data-tab="header">Header</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-textfield"  data-tab="textfield">TextField</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-footer"     data-tab="footer">Footer</button>
+  </nav>
+
+  <!-- ════════════════════════════════
+       탭 패널들
+  ════════════════════════════════ -->
+  <main>
+
+    <!-- ══ TAB: Overview ══ -->
+    <section id="tab-overview" class="tab-panel active" role="tabpanel">
+
+      <div class="section">
+        <h2 class="section-title">브랜드 컬러 팔레트</h2>
+
+        <span class="badge badge-mp">엠플랜잇</span>
+        <div class="color-grid">
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-azure-01)"></div><div class="color-info"><div class="color-name">mp-azure-01</div><div class="color-hex">#19448C</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-azure-02)"></div><div class="color-info"><div class="color-name">mp-azure-02</div><div class="color-hex">#379BC1</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-01)"></div><div class="color-info"><div class="color-name">mp-blue-01</div><div class="color-hex">#143162</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-05)"></div><div class="color-info"><div class="color-name">mp-blue-05</div><div class="color-hex">#2576C1</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-07)"></div><div class="color-info"><div class="color-name">mp-blue-07</div><div class="color-hex">#45BBE9</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-09)"></div><div class="color-info"><div class="color-name">mp-blue-09</div><div class="color-hex">#8AA4CA</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-10)"></div><div class="color-info"><div class="color-name">mp-blue-10</div><div class="color-hex">#ABD1FE</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-blue-11)"></div><div class="color-info"><div class="color-name">mp-blue-11</div><div class="color-hex">#D0E1F0</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-01)"></div><div class="color-info"><div class="color-name">mp-gray-01</div><div class="color-hex">#111111</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-04)"></div><div class="color-info"><div class="color-name">mp-gray-04</div><div class="color-hex">#5A5A5A</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-07)"></div><div class="color-info"><div class="color-name">mp-gray-07</div><div class="color-hex">#DFDFDF</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-mp-gray-08); border:1px solid var(--color-mp-gray-07)"></div><div class="color-info"><div class="color-name">mp-gray-08</div><div class="color-hex">#F8F9FA</div></div></div>
+        </div>
+
+        <p class="section-sub">AIA생명</p>
+        <span class="badge badge-aia">AIA생명</span>
+        <div class="color-grid">
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-red)"></div><div class="color-info"><div class="color-name">aia-red</div><div class="color-hex">#D31145</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-brown)"></div><div class="color-info"><div class="color-name">aia-brown</div><div class="color-hex">#5E1D1D</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-purple-01)"></div><div class="color-info"><div class="color-name">aia-purple-01</div><div class="color-hex">#9D1A5A</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-01)"></div><div class="color-info"><div class="color-name">aia-pink-01</div><div class="color-hex">#F67F87</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-03)"></div><div class="color-info"><div class="color-name">aia-pink-03</div><div class="color-hex">#FFBFD1</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-aia-pink-04)"></div><div class="color-info"><div class="color-name">aia-pink-04</div><div class="color-hex">#FDEAEA</div></div></div>
+        </div>
+
+        <p class="section-sub">흥국화재</p>
+        <span class="badge badge-hg">흥국화재</span>
+        <div class="color-grid">
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta)"></div><div class="color-info"><div class="color-name">hg-magenta</div><div class="color-hex">#EC008C</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple)"></div><div class="color-info"><div class="color-name">hg-purple</div><div class="color-hex">#351B6F</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-blue)"></div><div class="color-info"><div class="color-name">hg-blue</div><div class="color-hex">#0074E7</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-02)"></div><div class="color-info"><div class="color-name">hg-magenta-02</div><div class="color-hex">#E4499F</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-magenta-03)"></div><div class="color-info"><div class="color-name">hg-magenta-03</div><div class="color-hex">#FFEAF6</div></div></div>
+          <div class="color-card"><div class="color-swatch" style="background:var(--color-hg-purple-04)"></div><div class="color-info"><div class="color-name">hg-purple-04</div><div class="color-hex">#F5F1FD</div></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">타이포그래피 스케일</h2>
+        <div class="preview-card">
+          <div class="typo-row"><span class="typo-meta">title-hero · 72px / 700</span><span style="font-size:var(--font-size-title-hero);font-weight:var(--font-weight-title-hero);line-height:1">Title Hero</span></div>
+          <div class="typo-row"><span class="typo-meta">title-page-lg · 64px / 700</span><span style="font-size:var(--font-size-title-page-lg);font-weight:var(--font-weight-title-page);line-height:1.1">Title Page LG</span></div>
+          <div class="typo-row"><span class="typo-meta">title-page-md · 48px / 700</span><span style="font-size:var(--font-size-title-page-md);font-weight:var(--font-weight-title-page);line-height:1.1">Title Page MD</span></div>
+          <div class="typo-row"><span class="typo-meta">subtitle-md · 32px / 500</span><span style="font-size:var(--font-size-subtitle-md);font-weight:var(--font-weight-subtitle)">Subtitle MD</span></div>
+          <div class="typo-row"><span class="typo-meta">heading-lg · 32px / 600</span><span style="font-size:var(--font-size-heading-lg);font-weight:var(--font-weight-heading)">Heading LG</span></div>
+          <div class="typo-row"><span class="typo-meta">heading-md · 24px / 600</span><span style="font-size:var(--font-size-heading-md);font-weight:var(--font-weight-heading)">Heading MD</span></div>
+          <div class="typo-row"><span class="typo-meta">heading-sm · 20px / 600</span><span style="font-size:var(--font-size-heading-sm);font-weight:var(--font-weight-heading)">Heading SM</span></div>
+          <div class="typo-row"><span class="typo-meta">subheading-sm · 16px / 500</span><span style="font-size:var(--font-size-subheading-sm);font-weight:var(--font-weight-subheading)">Subheading SM</span></div>
+          <div class="typo-row"><span class="typo-meta">body-md regular · 16px / 500</span><span style="font-size:var(--font-size-body-md);font-weight:var(--font-weight-body-regular)">Body MD — 본문 텍스트 샘플입니다.</span></div>
+          <div class="typo-row"><span class="typo-meta">body-md strong · 16px / 700</span><span style="font-size:var(--font-size-body-md);font-weight:var(--font-weight-body-strong)">Body MD Strong — 강조 텍스트 샘플입니다.</span></div>
+          <div class="typo-row"><span class="typo-meta">body-sm regular · 14px / 500</span><span style="font-size:var(--font-size-body-sm);font-weight:var(--font-weight-body-regular)">Body SM — 보조 텍스트 샘플입니다.</span></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══ TAB: Button ══ -->
+    <section id="tab-button" class="tab-panel" role="tabpanel">
+
+      <div class="section">
+        <h2 class="section-title">Button</h2>
+
+        <!-- Variant × Size 표 -->
+        <p class="section-sub">Variant × Size</p>
+        <div class="preview-card">
+          <table class="size-table">
+            <thead>
+              <tr>
+                <th>Variant</th>
+                <th>SM</th>
+                <th>MD (기본)</th>
+                <th>LG</th>
+                <th>Disabled (MD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="variant-label">btn_primary</span></td>
+                <td><button class="btn btn-primary btn-sm">버튼</button></td>
+                <td><button class="btn btn-primary btn-md">버튼 텍스트</button></td>
+                <td><button class="btn btn-primary btn-lg">버튼 텍스트</button></td>
+                <td><button class="btn btn-primary btn-md btn-disabled">버튼 텍스트</button></td>
+              </tr>
+              <tr>
+                <td><span class="variant-label">btn_secondary</span></td>
+                <td><button class="btn btn-secondary btn-sm">버튼</button></td>
+                <td><button class="btn btn-secondary btn-md">버튼 텍스트</button></td>
+                <td><button class="btn btn-secondary btn-lg">버튼 텍스트</button></td>
+                <td><button class="btn btn-secondary btn-md btn-disabled">버튼 텍스트</button></td>
+              </tr>
+              <tr>
+                <td><span class="variant-label">btn_neutral</span></td>
+                <td><button class="btn btn-neutral btn-sm">버튼</button></td>
+                <td><button class="btn btn-neutral btn-md">버튼 텍스트</button></td>
+                <td><button class="btn btn-neutral btn-lg">버튼 텍스트</button></td>
+                <td><button class="btn btn-neutral btn-md btn-disabled">버튼 텍스트</button></td>
+              </tr>
+              <tr>
+                <td><span class="variant-label">btn_txt</span></td>
+                <td><button class="btn btn-txt" style="font-size:var(--font-size-body-sm)">텍스트 버튼</button></td>
+                <td><button class="btn btn-txt">텍스트 버튼</button></td>
+                <td><button class="btn btn-txt" style="font-size:var(--font-size-body-lg)">텍스트 버튼</button></td>
+                <td><button class="btn btn-txt btn-disabled">텍스트 버튼</button></td>
+              </tr>
+              <tr>
+                <td><span class="variant-label">btn_arrow</span></td>
+                <td><button class="btn btn-arrow" style="font-size:var(--font-size-body-sm);gap:var(--spacing-6)">더보기 →</button></td>
+                <td><button class="btn btn-arrow" style="gap:var(--spacing-8)">더보기 →</button></td>
+                <td><button class="btn btn-arrow" style="font-size:var(--font-size-body-lg);gap:var(--spacing-8)">더보기 →</button></td>
+                <td><button class="btn btn-arrow btn-disabled">더보기 →</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 아이콘 포함 -->
+        <p class="section-sub">아이콘 포함 (icon + label)</p>
+        <div class="preview-card">
+          <div class="row">
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">Icon Left</p>
+              <button class="btn btn-primary btn-md">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="white" stroke-width="1.5"/><path d="M11 11l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+                검색
+              </button>
+            </div>
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">Icon Right</p>
+              <button class="btn btn-secondary btn-md">
+                다운로드
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v7M5 8l3 3 3-3" stroke="var(--color-mp-azure-01)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13h10" stroke="var(--color-mp-azure-01)" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">Icon Only</p>
+              <button class="btn btn-neutral btn-md" style="width:var(--spacing-48);padding:0">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2v14M2 9h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Fixed -->
+        <p class="section-sub">cta-btn-fixed (전체 너비)</p>
+        <div class="preview-card">
+          <button class="btn btn-cta btn-md" style="height:var(--spacing-64);font-size:var(--font-size-body-md)">지금 시작하기</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ TAB: Header ══ -->
+    <section id="tab-header" class="tab-panel" role="tabpanel">
+
+      <div class="section">
+        <h2 class="section-title">Header</h2>
+
+        <!-- MP -->
+        <p class="section-sub">client="mp" — 엠플랜잇</p>
+        <span class="badge badge-mp">mp</span>
+        <div class="header-demo">
+          <div class="h-bar">
+            <div class="h-left">
+              <span class="h-logo" style="color:var(--color-mp-azure-01)">mplanit</span>
+              <nav class="h-nav">
+                <a href="#" class="active" style="color:var(--color-mp-azure-01);font-weight:var(--font-weight-body-strong)">서비스 소개</a>
+                <a href="#">요금제</a>
+                <a href="#">고객센터</a>
+                <a href="#">블로그</a>
+              </nav>
+            </div>
+            <div class="h-right">
+              <button class="h-cta" style="background:var(--color-mp-azure-01)">무료 시작</button>
+              <div class="h-hamburger"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AIA -->
+        <p class="section-sub">client="aia" — AIA생명</p>
+        <span class="badge badge-aia">aia</span>
+        <div class="header-demo">
+          <div class="h-bar">
+            <div class="h-left">
+              <span class="h-logo" style="color:var(--color-aia-red)">AIA생명</span>
+              <nav class="h-nav">
+                <a href="#" class="active" style="color:var(--color-aia-red);font-weight:var(--font-weight-body-strong)">보험 상품</a>
+                <a href="#">보험금 청구</a>
+                <a href="#">고객센터</a>
+              </nav>
+            </div>
+            <div class="h-right">
+              <button class="h-cta" style="background:var(--color-aia-red)">상담 신청</button>
+              <div class="h-hamburger"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HG -->
+        <p class="section-sub">client="hg" — 흥국화재</p>
+        <span class="badge badge-hg">hg</span>
+        <div class="header-demo">
+          <div class="h-bar">
+            <div class="h-left">
+              <span class="h-logo" style="color:var(--color-hg-magenta)">흥국화재</span>
+              <nav class="h-nav">
+                <a href="#" class="active" style="color:var(--color-hg-magenta);font-weight:var(--font-weight-body-strong)">보험 상품</a>
+                <a href="#">보험금 청구</a>
+                <a href="#">고객센터</a>
+              </nav>
+            </div>
+            <div class="h-right">
+              <button class="h-cta" style="background:var(--color-hg-magenta)">보험 가입</button>
+              <div class="h-hamburger"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모바일 메뉴 오픈 -->
+        <p class="section-sub">모바일 메뉴 Open 상태</p>
+        <div class="header-demo">
+          <div class="h-bar">
+            <div class="h-left">
+              <span class="h-logo" style="color:var(--color-mp-azure-01)">mplanit</span>
+            </div>
+            <div class="h-right">
+              <button class="h-cta" style="background:var(--color-mp-azure-01)">무료 시작</button>
+              <div class="h-hamburger">
+                <span style="transform:translateY(8px) rotate(45deg);display:block;transition:all 0.2s"></span>
+                <span style="opacity:0;display:block"></span>
+                <span style="transform:translateY(-8px) rotate(-45deg);display:block;transition:all 0.2s"></span>
+              </div>
+            </div>
+          </div>
+          <div class="h-mobile-menu">
+            <a href="#" style="color:var(--color-mp-azure-01);font-weight:var(--font-weight-body-strong)">서비스 소개</a>
+            <a href="#">요금제</a>
+            <a href="#">고객센터</a>
+            <a href="#">블로그</a>
+            <button class="btn btn-primary btn-md" style="margin-top:var(--spacing-12);width:100%;border-radius:var(--radius-16)">무료 시작</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ TAB: TextField ══ -->
+    <section id="tab-textfield" class="tab-panel" role="tabpanel">
+
+      <div class="section">
+        <h2 class="section-title">TextField</h2>
+
+        <!-- 상태별 -->
+        <p class="section-sub">상태별 (size="md")</p>
+        <div class="preview-card">
+          <div class="tf-grid">
+
+            <!-- Default -->
+            <div class="tf-case">
+              <span class="tf-case-label">Default</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md">
+                  <span class="tf-label tf-label-placeholder">이름</span>
+                  <input class="tf-input" type="text" placeholder="" readonly style="padding-top:0" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Placeholder only -->
+            <div class="tf-case">
+              <span class="tf-case-label">Placeholder</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md">
+                  <span class="tf-label tf-label-placeholder" style="color:var(--color-font-tertiary)">이름을 입력해주세요</span>
+                  <input class="tf-input" type="text" readonly style="padding-top:0" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Focus (시뮬레이션) -->
+            <div class="tf-case">
+              <span class="tf-case-label">Focus (시뮬레이션)</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md tf-focus">
+                  <span class="tf-label tf-label-float tf-label-focus">이름</span>
+                  <input class="tf-input" type="text" value="" readonly />
+                </div>
+              </div>
+            </div>
+
+            <!-- Filled -->
+            <div class="tf-case">
+              <span class="tf-case-label">Filled</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md">
+                  <span class="tf-label tf-label-float">이름</span>
+                  <input class="tf-input" type="text" value="홍길동" readonly />
+                </div>
+              </div>
+            </div>
+
+            <!-- Error -->
+            <div class="tf-case">
+              <span class="tf-case-label">Error</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md tf-error">
+                  <span class="tf-label tf-label-float">이메일</span>
+                  <input class="tf-input" type="text" value="wrongemail" readonly />
+                  <span class="tf-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="var(--color-aia-red)" stroke-width="2"/><path d="M7 7l6 6M13 7l-6 6" stroke="var(--color-aia-red)" stroke-width="2" stroke-linecap="round"/></svg>
+                  </span>
+                </div>
+                <span class="tf-helper tf-helper-error">올바른 이메일 형식이 아닙니다</span>
+              </div>
+            </div>
+
+            <!-- Success -->
+            <div class="tf-case">
+              <span class="tf-case-label">Success</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md tf-success">
+                  <span class="tf-label tf-label-float">아이디</span>
+                  <input class="tf-input" type="text" value="mplanit_user" readonly />
+                  <span class="tf-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="var(--color-hg-green-01)" stroke-width="2"/><path d="M6 10l3 3 5-5" stroke="var(--color-hg-green-01)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </div>
+                <span class="tf-helper tf-helper-success">사용 가능한 아이디입니다</span>
+              </div>
+            </div>
+
+            <!-- Disabled -->
+            <div class="tf-case">
+              <span class="tf-case-label">Disabled</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md tf-disabled">
+                  <span class="tf-label tf-label-float">이름</span>
+                  <input class="tf-input" type="text" value="홍길동" disabled />
+                </div>
+              </div>
+            </div>
+
+            <!-- Readonly -->
+            <div class="tf-case">
+              <span class="tf-case-label">Readonly</span>
+              <div class="tf-wrap">
+                <div class="tf-field tf-field-md tf-readonly">
+                  <span class="tf-label tf-label-float">이름</span>
+                  <input class="tf-input" type="text" value="홍길동" readonly style="cursor:default" />
+                </div>
+                <span class="tf-helper">수정 불가 항목입니다</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Size 비교 -->
+        <p class="section-sub">Size 비교 (status="default")</p>
+        <div class="preview-card">
+          <div class="col" style="max-width:320px">
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">SM</p>
+              <div class="tf-field tf-field-sm">
+                <span class="tf-label tf-label-float" style="font-size:10px">이름</span>
+                <input class="tf-input" type="text" value="홍길동" readonly style="font-size:var(--font-size-body-sm)" />
+              </div>
+            </div>
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">MD</p>
+              <div class="tf-field tf-field-md">
+                <span class="tf-label tf-label-float">이름</span>
+                <input class="tf-input" type="text" value="홍길동" readonly />
+              </div>
+            </div>
+            <div>
+              <p class="preview-label" style="margin-bottom:var(--spacing-8)">LG</p>
+              <div class="tf-field tf-field-lg">
+                <span class="tf-label tf-label-float" style="font-size:13px">이름</span>
+                <input class="tf-input" type="text" value="홍길동" readonly style="font-size:var(--font-size-body-lg)" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 아이콘 포함 -->
+        <p class="section-sub">아이콘 포함</p>
+        <div class="preview-card">
+          <div class="tf-grid">
+            <div class="tf-case">
+              <span class="tf-case-label">Left Icon</span>
+              <div class="tf-field tf-field-md">
+                <span class="tf-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="var(--color-mp-gray-05)" stroke-width="1.5"/><path d="M12.5 12.5l3 3" stroke="var(--color-mp-gray-05)" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </span>
+                <span class="tf-label tf-label-float">검색어</span>
+                <input class="tf-input" type="text" value="디자인 시스템" readonly />
+              </div>
+            </div>
+            <div class="tf-case">
+              <span class="tf-case-label">Right Icon</span>
+              <div class="tf-field tf-field-md">
+                <span class="tf-label tf-label-float">비밀번호</span>
+                <input class="tf-input" type="password" value="password123" readonly />
+                <span class="tf-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="var(--color-mp-gray-05)" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" stroke="var(--color-mp-gray-05)" stroke-width="1.5"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ TAB: Footer ══ -->
+    <section id="tab-footer" class="tab-panel" role="tabpanel">
+
+      <div class="section">
+        <h2 class="section-title">Footer</h2>
+
+        <!-- MP -->
+        <p class="section-sub">client="mp" — 엠플랜잇</p>
+        <span class="badge badge-mp">mp</span>
+        <div class="footer-demo">
+          <div class="ft-top">
+            <div class="ft-top-inner">
+              <div class="ft-left">
+                <span class="ft-logo" style="color:var(--color-mp-azure-02)">mplanit</span>
+                <nav class="ft-nav"><a href="#">회사소개</a><a href="#">서비스</a><a href="#">채용</a><a href="#">고객센터</a></nav>
+              </div>
+              <button class="ft-cta">뉴스레터 구독</button>
+            </div>
+            <div class="ft-divider-white"></div>
+          </div>
+          <div class="ft-mid">
+            <div class="ft-cols">
+              <div class="ft-col"><p class="ft-col-title">서비스</p><a href="#">소개</a><a href="#">요금제</a><a href="#">API</a></div>
+              <div class="ft-col"><p class="ft-col-title">회사</p><a href="#">팀 소개</a><a href="#">채용</a><a href="#">뉴스</a></div>
+              <div class="ft-col"><p class="ft-col-title">고객지원</p><a href="#">FAQ</a><a href="#">문의하기</a><a href="#">가이드</a></div>
+              <div class="ft-col">
+                <p class="ft-col-title">소셜 미디어</p>
+                <div class="ft-social">
+                  <div class="ft-social-icon"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="5" stroke="white" stroke-width="1.5"/><circle cx="10" cy="10" r="3.5" stroke="white" stroke-width="1.5"/><circle cx="14.5" cy="5.5" r="1" fill="white"/></svg></div>
+                  <div class="ft-social-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M17.5 6.5S17.3 5.2 16.7 4.6c-.7-.7-1.4-.7-1.8-.8C12.5 3.7 10 3.7 10 3.7s-2.5 0-4.9.1c-.4.1-1.1.1-1.8.8C2.7 5.2 2.5 6.5 2.5 6.5S2.3 8 2.3 9.5v1.4c0 1.5.2 3 .2 3S2.7 15.2 3.3 15.8c.7.7 1.6.7 2 .8 1.5.1 6.7.1 6.7.1s2.5 0 4.9-.2c.4-.1 1.1-.1 1.8-.8.6-.6.8-1.9.8-1.9s.2-1.5.2-3V9.5c0-1.5-.2-3-.2-3ZM8.3 12.5v-5l5 2.5-5 2.5Z" fill="white"/></svg></div>
+                  <div class="ft-social-icon"><svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4.5" width="15" height="11" rx="2" stroke="white" stroke-width="1.5"/><path d="M6 8h8M6 11h5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ft-divider-gray"></div>
+          <div class="ft-bottom">
+            <span class="ft-copyright">© 2026 mplanit Inc. All rights reserved.</span>
+            <div class="ft-legal"><a href="#">개인정보처리방침</a><a href="#">이용약관</a><a href="#">법적고지</a></div>
+          </div>
+        </div>
+
+        <!-- AIA -->
+        <p class="section-sub">client="aia" — AIA생명</p>
+        <span class="badge badge-aia">aia</span>
+        <div class="footer-demo">
+          <div class="ft-top" style="background:var(--color-mp-gray-02)">
+            <div class="ft-top-inner">
+              <div class="ft-left">
+                <span class="ft-logo" style="color:var(--color-aia-pink-01)">AIA생명</span>
+                <nav class="ft-nav"><a href="#">보험 상품</a><a href="#">보험금 청구</a><a href="#">고객센터</a></nav>
+              </div>
+              <button class="ft-cta">상담 신청</button>
+            </div>
+            <div class="ft-divider-white"></div>
+          </div>
+          <div class="ft-mid">
+            <div class="ft-cols">
+              <div class="ft-col"><p class="ft-col-title">보험 상품</p><a href="#">생명보험</a><a href="#">건강보험</a><a href="#">연금보험</a></div>
+              <div class="ft-col"><p class="ft-col-title">고객서비스</p><a href="#">보험금 청구</a><a href="#">증명서 발급</a><a href="#">FAQ</a></div>
+              <div class="ft-col"><p class="ft-col-title">회사정보</p><a href="#">회사 소개</a><a href="#">뉴스룸</a><a href="#">채용</a></div>
+            </div>
+          </div>
+          <div class="ft-divider-gray"></div>
+          <div class="ft-bottom">
+            <span class="ft-copyright">© 2026 AIA생명보험 주식회사. All rights reserved.</span>
+            <div class="ft-legal"><a href="#">개인정보처리방침</a><a href="#">이용약관</a></div>
+          </div>
+        </div>
+
+        <!-- HG -->
+        <p class="section-sub">client="hg" — 흥국화재</p>
+        <span class="badge badge-hg">hg</span>
+        <div class="footer-demo">
+          <div class="ft-top" style="background:var(--color-mp-gray-02)">
+            <div class="ft-top-inner">
+              <div class="ft-left">
+                <span class="ft-logo" style="color:var(--color-hg-magenta-02)">흥국화재</span>
+                <nav class="ft-nav"><a href="#">보험 상품</a><a href="#">보험금 청구</a><a href="#">고객센터</a></nav>
+              </div>
+              <button class="ft-cta">보험 가입</button>
+            </div>
+            <div class="ft-divider-white"></div>
+          </div>
+          <div class="ft-mid">
+            <div class="ft-cols">
+              <div class="ft-col"><p class="ft-col-title">화재보험</p><a href="#">주택화재</a><a href="#">일반화재</a><a href="#">장기화재</a></div>
+              <div class="ft-col"><p class="ft-col-title">자동차보험</p><a href="#">개인용</a><a href="#">업무용</a><a href="#">이륜차</a></div>
+              <div class="ft-col"><p class="ft-col-title">고객지원</p><a href="#">보험금 청구</a><a href="#">사고 접수</a><a href="#">FAQ</a></div>
+            </div>
+          </div>
+          <div class="ft-divider-gray"></div>
+          <div class="ft-bottom">
+            <span class="ft-copyright">© 2026 흥국화재해상보험 주식회사. All rights reserved.</span>
+            <div class="ft-legal"><a href="#">개인정보처리방침</a><a href="#">이용약관</a></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ════ 탭 전환 스크립트 ════ -->
+  <script>
+    // 탭 목록 — 새 탭 추가 시 HTML의 data-tab 속성과 section id만 맞추면 자동 동작
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = 'tab-' + btn.dataset.tab;
+
+        // 버튼 상태 전환
+        tabBtns.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+
+        // 패널 전환
+        tabPanels.forEach(panel => {
+          panel.classList.remove('active');
+        });
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

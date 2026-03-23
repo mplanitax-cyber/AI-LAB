@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landing Page Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0F0F0F;
+    --surface: #1A1A1A;
+    --border: #2A2A2A;
+    --accent: #FF2D78;
+    --accent2: #FF6B00;
+    --text: #F0F0F0;
+    --muted: #666;
+    --radius: 8px;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    width: 280px;
+    min-height: 420px;
+    padding: 16px;
+    font-size: 12px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .header-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .header-badge {
+    margin-left: auto;
+    font-size: 9px;
+    padding: 2px 6px;
+    background: rgba(255,45,120,0.15);
+    color: var(--accent);
+    border-radius: 20px;
+    border: 1px solid rgba(255,45,120,0.3);
+    letter-spacing: 0.5px;
+  }
+
+  /* Section label */
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .section {
+    margin-bottom: 14px;
+  }
+
+  /* Client selector */
+  .client-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .client-btn {
+    padding: 8px 4px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .client-btn:hover {
+    border-color: #444;
+    color: var(--text);
+  }
+
+  .client-btn.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(255,45,120,0.1);
+  }
+
+  .client-btn .dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin: 0 auto 4px;
+    background: var(--border);
+    transition: background 0.15s;
+  }
+
+  .client-btn.active .dot { background: var(--accent); }
+  .client-btn[data-client="AIA"] .dot { background: #D4003F; }
+  .client-btn[data-client="흥국"] .dot { background: #FF6B00; }
+  .client-btn[data-client="엠플"] .dot { background: #FF2D78; }
+
+  /* Page type */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .type-btn {
+    padding: 7px 4px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .type-btn:hover { border-color: #444; color: var(--text); }
+  .type-btn.active {
+    border-color: #FF6B00;
+    color: var(--text);
+    background: rgba(255,107,0,0.1);
+  }
+
+  /* File drop zone */
+  .dropzone {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+    position: relative;
+  }
+
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(255,45,120,0.05);
+  }
+
+  .dropzone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .drop-text {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .drop-text strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .file-info {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(255,45,120,0.08);
+    border: 1.5px solid rgba(255,45,120,0.3);
+    border-radius: var(--radius);
+    margin-top: 6px;
+  }
+
+  .file-info.visible { display: flex; }
+  .file-name { font-size: 11px; color: var(--text); font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+  .file-remove:hover { color: var(--accent); }
+
+  /* Generate button */
+  .generate-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: -0.2px;
+    margin-top: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .generate-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  }
+
+  .generate-btn:hover { background: #e0256a; transform: translateY(-1px); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { background: #333; color: var(--muted); cursor: not-allowed; transform: none; }
+
+  /* Status */
+  .status {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .status.visible { display: flex; }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+  }
+
+  .step-item.done { color: #4CAF50; }
+  .step-item.active { color: var(--text); }
+  .step-item.pending { color: var(--muted); }
+
+  /* Success */
+  .success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px;
+    background: rgba(76,175,80,0.08);
+    border: 1px solid rgba(76,175,80,0.3);
+    border-radius: var(--radius);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .success.visible { display: flex; }
+  .success-icon { font-size: 22px; }
+  .success-text { font-size: 12px; font-weight: 600; color: #4CAF50; }
+  .success-sub { font-size: 10px; color: var(--muted); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-dot"></div>
+  <span class="header-title">Landing Generator</span>
+  <span class="header-badge">AI</span>
+</div>
+
+<!-- 클라이언트 선택 -->
+<div class="section">
+  <div class="label">클라이언트</div>
+  <div class="client-grid">
+    <button class="client-btn" data-client="AIA" onclick="selectClient(this)">
+      <span class="dot"></span>AIA생명
+    </button>
+    <button class="client-btn" data-client="흥국" onclick="selectClient(this)">
+      <span class="dot"></span>흥국화재
+    </button>
+    <button class="client-btn active" data-client="엠플" onclick="selectClient(this)">
+      <span class="dot"></span>엠플랜잇
+    </button>
+  </div>
+</div>
+
+<!-- 페이지 타입 -->
+<div class="section">
+  <div class="label">페이지 타입</div>
+  <div class="type-grid">
+    <button class="type-btn active" data-type="landing" onclick="selectType(this)">🏠 랜딩</button>
+    <button class="type-btn" data-type="event" onclick="selectType(this)">🎯 이벤트</button>
+    <button class="type-btn" data-type="product" onclick="selectType(this)">📦 상품소개</button>
+  </div>
+</div>
+
+<!-- 파일 업로드 -->
+<div class="section">
+  <div class="label">기획서 업로드</div>
+  <div class="dropzone" id="dropzone"
+    ondragover="handleDragOver(event)"
+    ondragleave="handleDragLeave(event)"
+    ondrop="handleDrop(event)">
+    <input type="file" id="fileInput" accept=".pdf,.ppt,.pptx" onchange="handleFile(event)">
+    <span class="drop-icon">📄</span>
+    <div class="drop-text">
+      <strong>클릭</strong> 또는 드래그앤드롭<br>
+      PDF · PPT · PPTX
+    </div>
+  </div>
+  <div class="file-info" id="fileInfo">
+    <span class="file-name" id="fileName">—</span>
+    <button class="file-remove" onclick="removeFile()">✕</button>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 생성 버튼 -->
+<button class="generate-btn" id="generateBtn" onclick="generate()">
+  ✦ 랜딩페이지 생성하기
+</button>
+
+<!-- 진행 상태 -->
+<div class="status" id="statusBox">
+  <div class="spinner"></div>
+  <div class="status-steps" id="statusSteps">
+    <div class="step-item active" id="step1">⬡ 기획서 분석 중...</div>
+    <div class="step-item pending" id="step2">⬡ 섹션 구조 생성</div>
+    <div class="step-item pending" id="step3">⬡ 디자인 토큰 적용</div>
+    <div class="step-item pending" id="step4">⬡ Figma 프레임 생성</div>
+  </div>
+</div>
+
+<!-- 완료 -->
+<div class="success" id="successBox">
+  <div class="success-icon">✅</div>
+  <div class="success-text">생성 완료!</div>
+  <div class="success-sub">Figma 캔버스를 확인하세요</div>
+</div>
+
+<script>
+  let selectedClient = '엠플';
+  let selectedType = 'landing';
+  let uploadedFile = null;
+
+  function selectClient(btn) {
+    document.querySelectorAll('.client-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedClient = btn.dataset.client;
+  }
+
+  function selectType(btn) {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedType = btn.dataset.type;
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('dropzone').classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) setFile(file);
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (file) setFile(file);
+  }
+
+  function setFile(file) {
+    uploadedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileInfo').classList.add('visible');
+  }
+
+  function removeFile() {
+    uploadedFile = null;
+    document.getElementById('fileInfo').classList.remove('visible');
+    document.getElementById('fileInput').value = '';
+  }
+
+  function generate() {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+
+    document.getElementById('statusBox').classList.add('visible');
+    document.getElementById('successBox').classList.remove('visible');
+
+    const steps = ['step1', 'step2', 'step3', 'step4'];
+    const labels = [
+      '✦ 기획서 분석 중...',
+      '✦ 섹션 구조 생성 중...',
+      '✦ 디자인 토큰 적용 중...',
+      '✦ Figma 프레임 생성 중...'
+    ];
+
+    let current = 0;
+    steps.forEach(s => {
+      document.getElementById(s).className = 'step-item pending';
+      document.getElementById(s).textContent = '⬡ ' + labels[steps.indexOf(s)].replace('✦ ', '').replace(' 중...', '');
+    });
+
+    function nextStep() {
+      if (current > 0) {
+        document.getElementById(steps[current - 1]).className = 'step-item done';
+        document.getElementById(steps[current - 1]).textContent =
+          '✓ ' + labels[current - 1].replace('✦ ', '').replace(' 중...', '') + ' 완료';
+      }
+      if (current < steps.length) {
+        document.getElementById(steps[current]).className = 'step-item active';
+        document.getElementById(steps[current]).textContent = labels[current];
+        current++;
+        setTimeout(nextStep, 900 + Math.random() * 400);
+      } else {
+        document.getElementById('statusBox').classList.remove('visible');
+        document.getElementById('successBox').classList.add('visible');
+        btn.disabled = false;
+
+        // Figma로 메시지 전달
+        parent.postMessage({
+          pluginMessage: {
+            type: 'generate',
+            client: selectedClient,
+            pageType: selectedType,
+            hasFile: !!uploadedFile
+          }
+        }, '*');
+      }
+    }
+
+    nextStep();
+  }
+
+  // Figma로부터 메시지 수신
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    if (msg.type === 'error') {
+      alert('오류: ' + msg.message);
+      document.getElementById('generateBtn').disabled = false;
+      document.getElementById('statusBox').classList.remove('visible');
+    }
+  };
+</script>
+</body>
+</html>
