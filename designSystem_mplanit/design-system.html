@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mplanit Design System</title>
+  <link rel="stylesheet" href="./theme.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-base);
+      background: var(--color-mp-gray-08);
+      color: var(--color-font-primary);
+      min-height: 100vh;
+    }
+
+    /* ════════════════════════════════
+       HEADER
+    ════════════════════════════════ */
+    .ds-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-white-100);
+      border-bottom: 1px solid var(--color-black-15);
+      height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-40);
+    }
+
+    .ds-header__logo img {
+      width: 158px;
+      height: 48px;
+      display: block;
+    }
+
+    /* ════════════════════════════════
+       HERO
+    ════════════════════════════════ */
+    .ds-hero {
+      width: 100%;
+      height: 400px;
+      background: var(--color-mp-azure-01);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-16);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ds-hero__title {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-title-page-md);
+      font-weight: var(--font-weight-title-page);
+      color: var(--color-white-100);
+      letter-spacing: -2px;
+      line-height: var(--line-height-12);
+      text-align: center;
+    }
+
+    .ds-hero__sub {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular);
+      color: var(--color-white-70);
+      text-align: center;
+    }
+
+    /* ════════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════════ */
+    .ds-main {
+      max-width: 1920px;
+      margin: 0 auto;
+      padding: var(--spacing-40);
+    }
+
+    /* ════════════════════════════════
+       TABS
+    ════════════════════════════════ */
+    .ds-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-8);
+      margin-bottom: var(--spacing-40);
+    }
+
+    .ds-tab {
+      display: inline-flex;
+      padding: 10px 20px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: 100px;
+      border: 1px solid var(--color-black-20);
+      background: var(--color-gray-f7);
+      color: var(--color-blue-gray-500);
+      font-family: var(--font-family-base);
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 120%;
+      letter-spacing: -0.36px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+      white-space: nowrap;
+    }
+
+    .ds-tab:hover:not(.active) {
+      border-color: var(--color-black-20);
+      background: var(--color-mp-gray-07);
+      color: var(--color-font-primary);
+    }
+
+    .ds-tab.active {
+      border-color: transparent;
+      background: var(--color-black-100);
+      color: var(--color-white-100);
+    }
+
+    /* ════════════════════════════════
+       TAB PANELS
+    ════════════════════════════════ */
+    .ds-panel {
+      display: none;
+    }
+
+    .ds-panel.active {
+      display: block;
+    }
+
+    /* ════════════════════════════════
+       SECTION
+    ════════════════════════════════ */
+    .ds-section {
+      margin-bottom: var(--spacing-64);
+    }
+
+    .ds-section__header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+      margin-bottom: var(--spacing-24);
+      padding-bottom: var(--spacing-16);
+      border-bottom: 2px solid var(--color-black-15);
+    }
+
+    .ds-section__title {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-heading-md);
+      font-weight: var(--font-weight-heading);
+      color: var(--color-font-primary);
+      line-height: var(--line-height-12);
+    }
+
+    .ds-section__content {
+      min-height: 200px;
+      background: var(--color-white-100);
+      border-radius: var(--radius-16);
+      padding: var(--spacing-32);
+      border: 1px solid var(--color-black-15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-blue-gray-500);
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular);
+    }
+
+    /* ════════════════════════════════
+       HEADER DEMO
+    ════════════════════════════════ */
+    .hd-demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-32);
+    }
+
+    .hd-demo-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    .hd-demo-label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    .hd-demo-label__title {
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-primary);
+    }
+
+    .hd-demo-label__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--spacing-8);
+      background: var(--color-mp-gray-06);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-regular);
+      color: var(--color-font-tertiary);
+    }
+
+    .hd-demo-frame {
+      border-radius: var(--radius-8);
+      overflow: hidden;
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-mp-gray-06);
+    }
+
+    /* ── 공통 헤더 레이아웃 ── */
+    .demo-hd {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-40);
+      box-sizing: border-box;
+    }
+
+    /* mplanit Default: AI-Lab 그라디언트 배경 */
+    .demo-hd--mp-default {
+      height: var(--header-height-mp);
+      background: var(--gradient-ailab);
+    }
+    .demo-hd--mp-default .demo-hd__ham-line {
+      background: var(--color-white-100);
+    }
+
+    /* mplanit Scrolled: 흰배경 + border */
+    .demo-hd--mp-scrolled {
+      height: var(--header-height-mp);
+      background: var(--color-white-100);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    /* HG: 흰배경 */
+    .demo-hd--hg {
+      height: var(--header-height-hg);
+      background: var(--color-white-100);
+    }
+
+    /* AIA: 브랜드 레드 */
+    .demo-hd--aia {
+      height: var(--header-height-aia);
+      background: var(--color-aia-red);
+    }
+
+    /* ── 로고 ── */
+    .demo-hd__logo img {
+      display: block;
+      height: 40px;
+      width: auto;
+    }
+
+    .demo-hd__logo-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-6) var(--spacing-12);
+      background: var(--color-mp-gray-07);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family-en);
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-tertiary);
+    }
+
+    .demo-hd--aia .demo-hd__logo-placeholder {
+      background: var(--color-white-20);
+      color: var(--color-white-100);
+    }
+
+    /* ── 햄버거 ── */
+    .demo-hd__ham {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: var(--spacing-4);
+      width: 48px;
+      height: 48px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-hd__ham-line {
+      width: 24px;
+      height: 2px;
+      background: var(--color-font-primary);
+      border-radius: var(--radius-2);
+      display: block;
+    }
+
+    /* ── HG 전화 pill ── */
+    .demo-hd__phone {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-8) var(--spacing-16);
+      background: var(--color-hg-magenta);
+      border-radius: var(--radius-full);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-heading-md);
+      font-weight: var(--font-weight-heading);
+      color: var(--color-white-100);
+      white-space: nowrap;
+    }
+
+    .demo-hd__phone svg {
+      flex-shrink: 0;
+    }
+
+    /* ── AIA 우측 네비 ── */
+    .demo-hd__nav {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+    }
+
+    .demo-hd__nav a {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body-md);
+      font-weight: var(--font-weight-body-regular);
+      color: var(--color-white-100);
+      text-decoration: none;
+    }
+
+    .demo-hd__nav-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--spacing-4) var(--spacing-12);
+      background: var(--color-white-100);
+      border-radius: var(--radius-20);
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-aia-red);
+    }
+
+    /* ── 스펙 메타 ── */
+    .hd-demo-spec {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-16);
+      padding: var(--spacing-12) var(--spacing-16);
+      background: var(--color-white-100);
+      border-radius: var(--radius-8);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    .hd-demo-spec__item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-6);
+      font-size: var(--font-size-body-sm);
+      color: var(--color-font-tertiary);
+    }
+
+    .hd-demo-spec__key {
+      font-weight: var(--font-weight-body-strong);
+      color: var(--color-font-secondary);
+    }
+
+    .hd-demo-spec__val {
+      font-family: var(--font-family-en);
+      background: var(--color-mp-gray-08);
+      padding: 1px var(--spacing-6);
+      border-radius: var(--radius-4);
+      font-size: 12px;
+    }
+
+    /* ════════════════════════════════
+       RESPONSIVE — TABLET (768px)
+    ════════════════════════════════ */
+    @media (max-width: 768px) {
+      .ds-header {
+        height: 60px;
+        padding: 0 var(--spacing-20);
+      }
+
+      .ds-header__logo img {
+        width: 120px;
+        height: 37px;
+      }
+
+      .ds-hero {
+        height: 280px;
+        padding: 0 var(--spacing-20);
+      }
+
+      .ds-hero__title {
+        font-size: var(--font-size-title-page-sm);
+      }
+
+      .ds-main {
+        padding: var(--spacing-24) var(--spacing-20);
+      }
+
+      .ds-tab {
+        font-size: 15px;
+        padding: 8px 16px;
+      }
+
+      .ds-tabs {
+        gap: var(--spacing-6);
+        margin-bottom: var(--spacing-32);
+      }
+    }
+
+    /* ════════════════════════════════
+       RESPONSIVE — MOBILE (300px)
+    ════════════════════════════════ */
+    @media (max-width: 480px) {
+      .ds-header {
+        height: 52px;
+        padding: 0 var(--spacing-16);
+      }
+
+      .ds-header__logo img {
+        width: 100px;
+        height: 30px;
+      }
+
+      .ds-hero {
+        height: 220px;
+        padding: 0 var(--spacing-16);
+      }
+
+      .ds-hero__title {
+        font-size: var(--font-size-heading-lg);
+        letter-spacing: -1px;
+      }
+
+      .ds-main {
+        padding: var(--spacing-16) var(--spacing-12);
+      }
+
+      .ds-tabs {
+        gap: var(--spacing-4);
+        margin-bottom: var(--spacing-24);
+      }
+
+      .ds-tab {
+        font-size: 13px;
+        padding: 7px 12px;
+        letter-spacing: -0.2px;
+      }
+
+      .ds-section__content {
+        padding: var(--spacing-20);
+        min-height: 120px;
+      }
+    }
+
+    @media (max-width: 300px) {
+      .ds-main {
+        padding: var(--spacing-12) var(--spacing-8);
+      }
+
+      .ds-tab {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="ds-header">
+    <a href="#" class="ds-header__logo">
+      <img
+        src="./svg/mplanit_logo(158x48)_header.svg"
+        alt="Mplanit"
+        width="158"
+        height="48"
+      />
+    </a>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="ds-hero">
+    <h1 class="ds-hero__title">Mplanit Design System</h1>
+    <p class="ds-hero__sub">컴포넌트, 컬러, 타이포그래피 가이드</p>
+  </section>
+
+  <!-- ── Main ── -->
+  <main class="ds-main">
+
+    <!-- Tabs -->
+    <nav class="ds-tabs" role="tablist" aria-label="Design System 탭">
+      <button class="ds-tab active" role="tab" aria-selected="true"  data-target="panel-all">All</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-color">Color</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-typography">Typography</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-header">Header</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-footer">Footer</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-tabs">Tabs</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-menu">Menu</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-button">Button</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-textfield">Text field</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-checkbox">Checkbox</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-toggle">Toggle</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-table">Table</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-icon">Icon</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-cards">Cards</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-popup">Popup</button>
+      <button class="ds-tab"        role="tab" aria-selected="false" data-target="panel-logo">Logo</button>
+    </nav>
+
+    <!-- ── All Panel ── -->
+    <div id="panel-all" class="ds-panel active" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Color</h2></div>
+        <div class="ds-section__content">Color 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Typography</h2></div>
+        <div class="ds-section__content">Typography 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Header</h2></div>
+        <div class="hd-demo-wrap">
+          <div class="hd-demo-item">
+            <div class="hd-demo-label"><span class="hd-demo-label__title">mplanit — Default</span><span class="hd-demo-label__badge">variant=default</span></div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--mp-default">
+                <a href="#" class="demo-hd__logo"><img src="./svg/mplanit_ailab_logo(136x44)_header.svg" alt="mplanit AI Lab" /></a>
+                <button class="demo-hd__ham" aria-label="메뉴"><span class="demo-hd__ham-line"></span><span class="demo-hd__ham-line"></span><span class="demo-hd__ham-line"></span></button>
+              </div>
+            </div>
+          </div>
+          <div class="hd-demo-item">
+            <div class="hd-demo-label"><span class="hd-demo-label__title">mplanit — Scrolled</span><span class="hd-demo-label__badge">variant=scrolled</span></div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--mp-scrolled">
+                <a href="#" class="demo-hd__logo"><img src="./svg/mplanit_logo(158x48)_header.svg" alt="mplanit" /></a>
+                <button class="demo-hd__ham" aria-label="메뉴"><span class="demo-hd__ham-line"></span><span class="demo-hd__ham-line"></span><span class="demo-hd__ham-line"></span></button>
+              </div>
+            </div>
+          </div>
+          <div class="hd-demo-item">
+            <div class="hd-demo-label"><span class="hd-demo-label__title">흥국화재 (HG)</span><span class="hd-demo-label__badge">client=hg</span></div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--hg">
+                <a href="#" class="demo-hd__logo"><img src="./svg/HG_logo.svg" alt="흥국화재" /></a>
+                <button class="demo-hd__phone" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4.01 2.5c.29 0 .57.11.78.32l2.5 2.5c.43.43.43 1.13 0 1.56L5.8 8.37a10.4 10.4 0 004.83 4.83l1.49-1.49c.43-.43 1.13-.43 1.56 0l2.5 2.5c.43.43.43 1.13 0 1.56l-1.5 1.5c-.42.42-.98.65-1.57.64C6.53 17.74 2.26 13.47 2 7.4c-.01-.59.22-1.15.64-1.57l1.5-1.5c.21-.21.49-.32.78-.32h.09z" fill="white"/></svg><span>080-874-0000</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="hd-demo-item">
+            <div class="hd-demo-label"><span class="hd-demo-label__title">AIA</span><span class="hd-demo-label__badge">client=aia</span></div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--aia">
+                <a href="#" class="demo-hd__logo"><img src="./svg/AIA_logo.svg" alt="AIA" /></a>
+                <nav class="demo-hd__nav"><span class="demo-hd__nav-badge">로그인</span><a href="#">고객센터</a><a href="#">사이트맵</a></nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Footer</h2></div>
+        <div class="ds-section__content">Footer 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Tabs</h2></div>
+        <div class="ds-section__content">Tabs 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Menu</h2></div>
+        <div class="ds-section__content">Menu 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Button</h2></div>
+        <div class="ds-section__content">Button 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Text field</h2></div>
+        <div class="ds-section__content">Text field 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Checkbox</h2></div>
+        <div class="ds-section__content">Checkbox 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Toggle</h2></div>
+        <div class="ds-section__content">Toggle 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Table</h2></div>
+        <div class="ds-section__content">Table 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Icon</h2></div>
+        <div class="ds-section__content">Icon 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Cards</h2></div>
+        <div class="ds-section__content">Cards 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Popup</h2></div>
+        <div class="ds-section__content">Popup 콘텐츠 영역</div>
+      </section>
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Logo</h2></div>
+        <div class="ds-section__content">Logo 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <!-- ── Individual Panels ── -->
+    <div id="panel-color" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Color</h2></div>
+        <div class="ds-section__content">Color 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-typography" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Typography</h2></div>
+        <div class="ds-section__content">Typography 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-header" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Header</h2></div>
+
+        <div class="hd-demo-wrap">
+
+          <!-- ① mplanit / Default -->
+          <div class="hd-demo-item">
+            <div class="hd-demo-label">
+              <span class="hd-demo-label__title">mplanit — Default</span>
+              <span class="hd-demo-label__badge">client=mp · variant=default</span>
+            </div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--mp-default">
+                <a href="#" class="demo-hd__logo">
+                  <img src="./svg/mplanit_ailab_logo(136x44)_header.svg" alt="mplanit AI Lab" />
+                </a>
+                <button class="demo-hd__ham" aria-label="메뉴">
+                  <span class="demo-hd__ham-line"></span>
+                  <span class="demo-hd__ham-line"></span>
+                  <span class="demo-hd__ham-line"></span>
+                </button>
+              </div>
+            </div>
+            <div class="hd-demo-spec">
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Height</span><span class="hd-demo-spec__val">var(--header-height-mp) · 104px</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Background</span><span class="hd-demo-spec__val">transparent</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Padding</span><span class="hd-demo-spec__val">0 var(--spacing-360)</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Border</span><span class="hd-demo-spec__val">none</span></div>
+            </div>
+          </div>
+
+          <!-- ② mplanit / Scrolled -->
+          <div class="hd-demo-item">
+            <div class="hd-demo-label">
+              <span class="hd-demo-label__title">mplanit — Scrolled</span>
+              <span class="hd-demo-label__badge">client=mp · variant=scrolled</span>
+            </div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--mp-scrolled">
+                <a href="#" class="demo-hd__logo">
+                  <img src="./svg/mplanit_logo(158x48)_header.svg" alt="mplanit" />
+                </a>
+                <button class="demo-hd__ham" aria-label="메뉴">
+                  <span class="demo-hd__ham-line"></span>
+                  <span class="demo-hd__ham-line"></span>
+                  <span class="demo-hd__ham-line"></span>
+                </button>
+              </div>
+            </div>
+            <div class="hd-demo-spec">
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Height</span><span class="hd-demo-spec__val">var(--header-height-mp) · 104px</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Background</span><span class="hd-demo-spec__val">var(--color-white-100)</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Border-bottom</span><span class="hd-demo-spec__val">1px solid var(--color-border-subtle)</span></div>
+            </div>
+          </div>
+
+          <!-- ③ HG (흥국화재) -->
+          <div class="hd-demo-item">
+            <div class="hd-demo-label">
+              <span class="hd-demo-label__title">흥국화재 (HG)</span>
+              <span class="hd-demo-label__badge">client=hg</span>
+            </div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--hg">
+                <a href="#" class="demo-hd__logo">
+                  <img src="./svg/HG_logo.svg" alt="흥국화재" />
+                </a>
+                <button class="demo-hd__phone" type="button">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4.01 2.5c.29 0 .57.11.78.32l2.5 2.5c.43.43.43 1.13 0 1.56L5.8 8.37a10.4 10.4 0 004.83 4.83l1.49-1.49c.43-.43 1.13-.43 1.56 0l2.5 2.5c.43.43.43 1.13 0 1.56l-1.5 1.5c-.42.42-.98.65-1.57.64C6.53 17.74 2.26 13.47 2 7.4c-.01-.59.22-1.15.64-1.57l1.5-1.5c.21-.21.49-.32.78-.32h.09z" fill="white"/>
+                  </svg>
+                  <span>080-874-0000</span>
+                </button>
+              </div>
+            </div>
+            <div class="hd-demo-spec">
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Height</span><span class="hd-demo-spec__val">var(--header-height-hg) · 94px</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Background</span><span class="hd-demo-spec__val">var(--color-white-100)</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">CTA</span><span class="hd-demo-spec__val">pill · var(--color-hg-magenta) · radius-full</span></div>
+            </div>
+          </div>
+
+          <!-- ④ AIA -->
+          <div class="hd-demo-item">
+            <div class="hd-demo-label">
+              <span class="hd-demo-label__title">AIA</span>
+              <span class="hd-demo-label__badge">client=aia</span>
+            </div>
+            <div class="hd-demo-frame">
+              <div class="demo-hd demo-hd--aia">
+                <a href="#" class="demo-hd__logo">
+                  <img src="./svg/AIA_logo.svg" alt="AIA" />
+                </a>
+                <nav class="demo-hd__nav">
+                  <span class="demo-hd__nav-badge">로그인</span>
+                  <a href="#">고객센터</a>
+                  <a href="#">사이트맵</a>
+                </nav>
+              </div>
+            </div>
+            <div class="hd-demo-spec">
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Height</span><span class="hd-demo-spec__val">var(--header-height-aia) · 72px</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Background</span><span class="hd-demo-spec__val">var(--color-aia-red)</span></div>
+              <div class="hd-demo-spec__item"><span class="hd-demo-spec__key">Text</span><span class="hd-demo-spec__val">var(--color-white-100)</span></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <div id="panel-footer" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Footer</h2></div>
+        <div class="ds-section__content">Footer 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-tabs" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Tabs</h2></div>
+        <div class="ds-section__content">Tabs 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-menu" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Menu</h2></div>
+        <div class="ds-section__content">Menu 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-button" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Button</h2></div>
+        <div class="ds-section__content">Button 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-textfield" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Text field</h2></div>
+        <div class="ds-section__content">Text field 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-checkbox" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Checkbox</h2></div>
+        <div class="ds-section__content">Checkbox 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-toggle" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Toggle</h2></div>
+        <div class="ds-section__content">Toggle 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-table" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Table</h2></div>
+        <div class="ds-section__content">Table 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-icon" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Icon</h2></div>
+        <div class="ds-section__content">Icon 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-cards" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Cards</h2></div>
+        <div class="ds-section__content">Cards 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-popup" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Popup</h2></div>
+        <div class="ds-section__content">Popup 콘텐츠 영역</div>
+      </section>
+    </div>
+
+    <div id="panel-logo" class="ds-panel" role="tabpanel">
+      <section class="ds-section">
+        <div class="ds-section__header"><h2 class="ds-section__title">Logo</h2></div>
+        <div class="ds-section__content">Logo 콘텐츠 영역</div>
+      </section>
+    </div>
+
+  </main>
+
+  <script>
+    const tabs   = document.querySelectorAll('.ds-tab');
+    const panels = document.querySelectorAll('.ds-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        const target = document.getElementById(tab.dataset.target);
+        if (target) target.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
