@@ -1,0 +1,10 @@
+code.js — 5가지 핵심 수정
+loadFont() 헬퍼를 새로 만들어 Pretendard → Apple SD Gothic Neo → Inter 순서로 폰트를 fallback 처리합니다. 폰트가 없는 환경에서 플러그인이 죽는 문제가 해결됩니다.
+모든 버튼과 텍스트 컨테이너에 Auto Layout(layoutMode: "VERTICAL"/"HORIZONTAL")을 적용했습니다. 텍스트 길이가 달라져도 레이아웃이 자동으로 늘어납니다.
+텍스트 위치 계산 오류를 수정했습니다. characters 설정 → textAutoResize → resize() 순서로 처리해 .width/.height가 정확한 값을 반환합니다.
+섹션 프레임 전체를 layoutMode: "VERTICAL" + primaryAxisSizingMode: "AUTO"로 구성해 섹션이 쌓일 때 자동으로 높이가 맞춰집니다.
+code.js → ui.html로 status 메시지를 단계별로 보내 진행 상황을 실시간 동기화합니다.
+ui.html — 3가지 핵심 수정
+generate() 함수에서 FileReader로 PDF를 base64 변환 후 fileData를 pluginMessage에 포함해 전송합니다. 기존에는 파일 데이터가 아예 전달되지 않아 Claude API 호출이 항상 실패했습니다.
+PDF만 허용하도록 파일 타입 검증을 추가했고, 파일 크기도 표시됩니다.
+window.onmessage에서 status / done / error 세 가지 메시지를 받아 스텝 UI를 실제 진행에 맞게 업데이트합니다.
