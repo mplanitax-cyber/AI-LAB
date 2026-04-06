@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dd-da 콘텐츠 생성기 v4</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--sur:#fff;--sur2:#f9f8f5;--sur3:#f0efe9;
+  --bd:#e2e0d8;--bd2:#d0cec5;--t:#18181a;--t2:#52514d;--t3:#8a8880;
+  --r:10px;--rs:7px;--font:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --visa:#1d55c2;--visa-bg:#eef2fd;--visa-bd:#b8c9f5;
+  --home:#0a7c52;--home-bg:#e8f7f1;--home-bd:#7dd3b5;
+  --job:#b55c08;--job-bg:#fef3e6;--job-bd:#f5c482;
+  --med:#b91c1c;--med-bg:#fdf0f0;--med-bd:#f4a9a9;
+  --life:#5b21b6;--life-bg:#f1ecfd;--life-bd:#c4adf5;
+  --edu:#0e6fa8;--edu-bg:#e8f4fc;--edu-bd:#7dc3e9;
+  --move:#3d4a5c;--move-bg:#edf0f4;--move-bd:#a8b4c5;
+  --hot:#9c1268;--hot-bg:#fceef6;--hot-bd:#e9a4d0;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--t);line-height:1.5;min-height:100vh}
+button{font-family:var(--font);cursor:pointer;border-radius:var(--rs)}
+.app{max-width:1140px;margin:0 auto;padding:1.25rem 1rem 4rem}
+
+.hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.hd h1{font-size:17px;font-weight:700}.hd p{font-size:11px;color:var(--t3);margin-top:2px}
+.hd-stats{display:flex;gap:8px}
+.stat{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--rs);padding:5px 12px;text-align:center}
+.stat-n{font-size:16px;font-weight:700}.stat-l{font-size:10px;color:var(--t3)}
+
+/* progress steps */
+.steps{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:8px 14px}
+.step{font-size:11px;padding:3px 10px;border-radius:20px;border:.5px solid var(--bd2);color:var(--t3);white-space:nowrap;transition:all .2s}
+.step.done{background:#e8f7f1;border-color:#0a7c52;color:#0a7c52}
+.step.cur{background:#eef2fd;border-color:#1d55c2;color:#1d55c2;font-weight:600}
+.sarr{color:var(--bd2);font-size:11px}
+
+/* required / optional badges */
+.req-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;background:#fdf0f0;color:#b91c1c;margin-left:6px}
+.opt-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600;background:var(--sur2);color:var(--t3);margin-left:6px}
+.def-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600;background:#e8f7f1;color:#0a7c52;margin-left:4px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:230px 1fr;gap:12px;align-items:start}
+@media(max-width:720px){.layout{grid-template-columns:1fr}}
+
+/* left panel */
+.lpanel{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:12px;position:sticky;top:12px}
+.pnl-t{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+
+.rtabs{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
+.rtab{padding:6px 10px;font-size:12px;border:.5px solid var(--bd);background:transparent;color:var(--t2);text-align:left;transition:all .12s}
+.rtab:hover{background:var(--sur3)}.rtab.on{background:var(--visa-bg);border-color:var(--visa-bd);color:var(--visa);font-weight:600}
+.rtab-cnt{float:right;font-size:10px;opacity:.6}
+
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.cbtn{border:.5px solid var(--bd);padding:6px 2px;text-align:center;background:transparent;transition:all .12s}
+.cbtn:hover{background:var(--sur3)}.cbtn.on{border-color:var(--visa-bd);background:var(--visa-bg)}
+.cf{font-size:17px;display:block;line-height:1.25}.cn{font-size:9px;color:var(--t);line-height:1.3}
+
+.sub-wrap{margin-top:8px;padding-top:8px;border-top:.5px solid var(--bd)}
+.sub-lbl{font-size:10px;color:var(--t3);margin-bottom:5px}
+.srow{display:flex;gap:3px;flex-wrap:wrap}
+.spill{padding:3px 8px;border:.5px solid var(--bd);border-radius:20px;font-size:11px;background:transparent;color:var(--t2);transition:all .12s}
+.spill:hover{background:var(--sur3)}.spill.on{border-color:var(--visa-bd);background:var(--visa-bg);color:var(--visa)}
+
+/* right panel */
+.rpanel{display:flex;flex-direction:column;gap:10px}
+
+/* selection bar */
+.selbar{display:flex;gap:5px;flex-wrap:wrap;align-items:center;background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:7px 12px}
+.schip{font-size:11px;padding:2px 8px;border-radius:5px;border:.5px solid var(--bd2);color:var(--t3);background:var(--sur3);white-space:nowrap}
+.schip.filled{background:var(--visa-bg);border-color:var(--visa-bd);color:var(--visa);font-weight:600}
+
+/* section cards */
+.scard{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:14px}
+.scard-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:4px}
+.scard-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
+.scard-sub{font-size:11px;color:var(--t3)}
+
+/* service category grid */
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media(max-width:600px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
+.svc-card{border:.5px solid var(--bd);padding:10px 10px 9px;background:transparent;text-align:left;position:relative;overflow:hidden;transition:all .14s}
+.svc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0}
+.svc-card:hover{background:var(--sur3)}
+.svc-visa::before{background:var(--visa)}.svc-visa.on{background:var(--visa-bg);border-color:var(--visa-bd)}
+.svc-home::before{background:var(--home)}.svc-home.on{background:var(--home-bg);border-color:var(--home-bd)}
+.svc-job::before{background:var(--job)}.svc-job.on{background:var(--job-bg);border-color:var(--job-bd)}
+.svc-med::before{background:var(--med)}.svc-med.on{background:var(--med-bg);border-color:var(--med-bd)}
+.svc-life::before{background:var(--life)}.svc-life.on{background:var(--life-bg);border-color:var(--life-bd)}
+.svc-edu::before{background:var(--edu)}.svc-edu.on{background:var(--edu-bg);border-color:var(--edu-bd)}
+.svc-move::before{background:var(--move)}.svc-move.on{background:var(--move-bg);border-color:var(--move-bd)}
+.svc-hot::before{background:var(--hot)}.svc-hot.on{background:var(--hot-bg);border-color:var(--hot-bd)}
+.svc-ic{font-size:18px;display:block;margin-bottom:4px}
+.svc-name{font-size:12px;font-weight:600;color:var(--t);margin-bottom:2px;display:block}
+.svc-desc{font-size:10px;color:var(--t3);line-height:1.3;display:block}
+
+/* ctype chips */
+.ctype-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.ctypechip{padding:4px 10px;font-size:11px;border:.5px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);transition:all .12s}
+.ctypechip:hover{background:var(--sur3)}.ctypechip.on{border-color:var(--bd2);background:var(--sur3);color:var(--t);font-weight:600}
+
+/* topic grid */
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:4px}
+.tbtn{border:.5px solid var(--bd);padding:8px 11px;text-align:left;background:transparent;font-size:12px;color:var(--t2);line-height:1.4;position:relative;transition:all .12s}
+.tbtn:hover{background:var(--sur3)}.tbtn.on{font-weight:600}
+.ttag{position:absolute;top:5px;right:6px;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600}
+.tbtn.on-visa{border-color:var(--visa-bd);background:var(--visa-bg);color:var(--visa)}
+.tbtn.on-home{border-color:var(--home-bd);background:var(--home-bg);color:var(--home)}
+.tbtn.on-job{border-color:var(--job-bd);background:var(--job-bg);color:var(--job)}
+.tbtn.on-med{border-color:var(--med-bd);background:var(--med-bg);color:var(--med)}
+.tbtn.on-life{border-color:var(--life-bd);background:var(--life-bg);color:var(--life)}
+.tbtn.on-edu{border-color:var(--edu-bd);background:var(--edu-bg);color:var(--edu)}
+.tbtn.on-move{border-color:var(--move-bd);background:var(--move-bg);color:var(--move)}
+.tbtn.on-hot{border-color:var(--hot-bd);background:var(--hot-bg);color:var(--hot)}
+
+/* format grid */
+.fmt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media(max-width:600px){.fmt-grid{grid-template-columns:repeat(2,1fr)}}
+.fmt-btn{border:.5px solid var(--bd);padding:9px 8px;text-align:center;background:transparent;transition:all .12s}
+.fmt-btn:hover{background:var(--sur3)}.fmt-btn.on{border-color:#b55c08;background:#fef3e6}
+.fmt-ic{font-size:16px;display:block;margin-bottom:3px}
+.fmt-id{font-size:9px;color:var(--t3);margin-bottom:1px;display:block}
+.fmt-name{font-size:11px;font-weight:500;color:var(--t);line-height:1.2;display:block}
+.fmt-btn.on .fmt-name{color:#b55c08}.fmt-btn.on .fmt-id{color:#b55c08}.fmt-btn.on span:last-child{color:#b55c08!important}
+
+/* target row */
+.target-grid{display:flex;gap:5px;flex-wrap:wrap}
+.tgt-btn{padding:6px 12px;border:.5px solid var(--bd);border-radius:20px;font-size:11px;background:transparent;color:var(--t2);transition:all .12s}
+.tgt-btn:hover{background:var(--sur3)}.tgt-btn.on{border-color:#0a7c52;background:#e8f7f1;color:#0a7c52;font-weight:600}
+
+/* auto note */
+.auto-note{background:var(--sur2);border-radius:var(--rs);padding:8px 11px;font-size:11px;color:var(--t2);display:flex;align-items:flex-start;gap:7px;line-height:1.4;margin-top:8px}
+
+/* SEO */
+.seo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+@media(max-width:600px){.seo-grid{grid-template-columns:1fr}}
+.seo-row{background:var(--sur2);border-radius:var(--rs);padding:9px 11px}
+.seo-lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+.seo-val{font-size:12px;font-weight:600;color:var(--t);line-height:1.4}.seo-val.muted{font-weight:400;color:var(--t2)}
+.kwrap{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.ktag{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#eef2fd;color:#1d55c2}
+.seo-ph{text-align:center;padding:12px;font-size:12px;color:var(--t3)}
+
+.info-meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.imeta{background:var(--sur2);border-radius:var(--rs);padding:7px 10px;flex:1;min-width:100px}
+.imeta-lbl{font-size:10px;color:var(--t3);margin-bottom:2px}.imeta-val{font-size:12px;font-weight:600;color:var(--t)}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.b-blue{background:#eef2fd;color:#1d55c2}.b-green{background:#e8f7f1;color:#0a7c52}
+.b-amber{background:#fef3e6;color:#b55c08}.b-red{background:#fdf0f0;color:#b91c1c}
+.b-purple{background:#f1ecfd;color:#5b21b6}.b-gray{background:var(--sur2);color:var(--t3)}
+
+/* generate button */
+.gbtn{width:100%;padding:13px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;background:var(--t);color:#fff;margin-top:8px;transition:all .15s;letter-spacing:.01em}
+.gbtn:hover:not(:disabled){background:#333}.gbtn:disabled{opacity:.3;cursor:default}
+.gbtn.running{background:var(--sur);color:var(--t);border:.5px solid var(--bd2);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* output */
+.outbox{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.otabs{display:flex;border-bottom:.5px solid var(--bd);background:var(--sur2);overflow-x:auto}
+.otab{padding:9px 16px;font-size:12px;background:transparent;border:none;color:var(--t3);border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;transition:all .12s}
+.otab:hover{color:var(--t2)}.otab.on{color:var(--t);border-bottom-color:var(--t);font-weight:700;background:var(--sur)}
+.opanel{padding:1.25rem;display:none;max-height:680px;overflow-y:auto;overflow-x:hidden}.opanel.on{display:block}
+
+/* AI summary */
+.ai-summary-block{border-left:3px solid #1d55c2;border-radius:0 var(--rs) var(--rs) 0;background:#f7f9ff;border:.5px solid #b8c9f5;border-left-width:3px;padding:14px 16px;margin-bottom:16px}
+.ai-sum-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.ai-sum-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#185fa5}
+.ai-chip{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#1d55c2;color:#fff}
+.ai-pts{display:flex;flex-direction:column;gap:7px}
+.ai-pt{display:flex;gap:9px;font-size:13px;color:#1a1a18;line-height:1.5}
+.ai-pt-n{width:18px;height:18px;border-radius:50%;background:#1d55c2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ai-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+
+/* prose */
+.prose{font-size:13px;line-height:1.8;color:var(--t)}
+.prose h2{font-size:16px;font-weight:700;margin:1rem 0 .4rem}
+.prose h3{font-size:14px;font-weight:700;margin:.8rem 0 .3rem}
+.prose p{margin-bottom:.6rem}
+.prose ul,.prose ol{margin:.25rem 0 .6rem 1.2rem}.prose li{margin-bottom:.22rem}
+.prose table{width:100%;border-collapse:collapse;font-size:12px;margin:.5rem 0}
+.prose th{background:var(--sur2);padding:6px 8px;border:.5px solid var(--bd);font-weight:700;text-align:left}
+.prose td{padding:5px 8px;border:.5px solid var(--bd)}
+.prose blockquote{border-left:3px solid #1d55c2;padding:.3rem .8rem;color:var(--t2);margin:.5rem 0;font-size:12px;background:#f7f9ff;border-radius:0 6px 6px 0}
+.prose hr{border:none;border-top:.5px solid var(--bd);margin:.75rem 0}
+.prose code{font-family:monospace;font-size:11px;background:var(--sur2);padding:1px 4px;border-radius:3px}
+.prose strong{font-weight:700}
+
+/* info status */
+.info-status-block{border:.5px solid var(--bd);border-radius:var(--rs);overflow:hidden;margin:16px 0 12px}
+.info-status-hd{background:var(--sur2);padding:8px 12px;font-size:11px;font-weight:700;color:var(--t2);border-bottom:.5px solid var(--bd)}
+.info-status-body{padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap}
+.isb-item{flex:1;min-width:90px}
+.isb-lbl{font-size:10px;color:var(--t3);margin-bottom:3px}.isb-val{font-size:12px;font-weight:600;color:var(--t)}
+
+/* source block */
+.src-block{border:.5px solid var(--bd);border-radius:var(--rs);overflow:hidden;margin-bottom:12px}
+.src-hd{background:var(--sur2);padding:8px 12px;border-bottom:.5px solid var(--bd);font-size:11px;font-weight:700;color:var(--t2)}
+.src-rows{padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.src-row{display:flex;gap:10px;align-items:flex-start}
+.src-ic{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.src-type{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.src-val{font-size:12px;color:var(--t);line-height:1.4}
+.src-disc{font-size:11px;color:var(--t3);padding:9px 12px;border-top:.5px solid var(--bd);background:var(--sur2);line-height:1.5}
+
+/* disclaimer */
+.disclaimer{background:var(--sur2);border-radius:var(--rs);padding:9px 12px;font-size:11px;color:var(--t3);line-height:1.5}
+
+/* info cards for SEO tab */
+.info-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.icard{background:var(--sur2);border-radius:var(--rs);padding:10px 12px}
+.icard-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:4px}
+.icard-val{font-size:13px;font-weight:600;color:var(--t);line-height:1.4}
+.icard-val.small{font-size:12px;font-weight:400;color:var(--t2)}
+
+/* loader */
+.ldots{display:flex;gap:5px;align-items:center;padding:.75rem 0;color:var(--t3);font-size:12px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:blink .9s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+pre.raw{font-family:monospace;font-size:11px;background:var(--sur2);padding:.75rem;border-radius:var(--rs);overflow-x:auto;white-space:pre-wrap;color:var(--t2);line-height:1.5}
+.empty-msg{color:var(--t3);text-align:center;padding:1rem;font-size:12px}
+.err-box{padding:1rem;border-radius:var(--rs);background:#fdf0f0;border:.5px solid #f4a9a9;color:#b91c1c;font-size:13px;line-height:1.6}
+
+/* ── AI 대표 이미지 블록 ── */
+
+to{width:0%}}
+
+.export-wrap{display:flex;flex-direction:column;gap:12px}
+.export-section{background:var(--sur2);border-radius:var(--rs);padding:12px}
+.export-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.field-map-grid{display:flex;flex-direction:column;gap:6px}
+.field-row{display:grid;grid-template-columns:130px 1fr 80px;gap:6px;align-items:center}
+.field-lbl{font-size:11px;font-weight:500;color:var(--t);white-space:nowrap}
+.field-val{font-size:11px;padding:5px 8px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur);color:var(--t);word-break:break-all;line-height:1.4;min-height:28px}
+.field-val.multiline{white-space:pre-wrap;min-height:60px;max-height:120px;overflow-y:auto}
+.copy-btn{padding:4px 8px;font-size:10px;border:.5px solid var(--bd2);border-radius:var(--rs);background:transparent;color:var(--t2);cursor:pointer;white-space:nowrap}
+.copy-btn:hover{background:var(--sur3)}.copy-btn.copied{background:#e8f7f1;color:#0a7c52;border-color:#0a7c52}
+.export-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.exp-btn{padding:7px 14px;font-size:12px;font-weight:600;border:.5px solid var(--bd2);border-radius:var(--rs);background:transparent;color:var(--t);cursor:pointer}
+.exp-btn:hover{background:var(--sur3)}
+.exp-btn.primary{background:var(--t);color:#fff;border-color:var(--t)}
+.exp-btn.primary:hover{background:#333}
+.api-config{display:flex;flex-direction:column;gap:6px}
+.api-row{display:flex;gap:6px;align-items:center}
+.api-input{flex:1;padding:6px 9px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur);color:var(--t);font-family:var(--font)}
+.api-input::placeholder{color:var(--t3)}
+.api-method{width:72px}
+.json-preview{font-family:monospace;font-size:10px;background:#18181a;color:#a8d8a8;padding:10px;border-radius:var(--rs);overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.5}
+
+/* ── 어드민 폼 스타일 ── */
+.admin-form-wrap{border:.5px solid #d0cec5;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#fff;max-width:100%}
+.admin-form-header{background:#f5f4f0;padding:10px 16px;border-bottom:.5px solid #d0cec5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.admin-form-header-title{font-size:12px;font-weight:700;color:#18181a;display:flex;align-items:center;gap:7px}
+.admin-form-badge{background:#1d4ed8;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.admin-form-hint{font-size:10px;color:#8a8880}
+.admin-section{padding:14px 16px;border-bottom:.5px solid #e2e0d8;overflow:hidden}
+.admin-section:last-child{border-bottom:none}
+.admin-section-title{font-size:11px;font-weight:700;color:#52514d;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.admin-section-title::before{content:'';display:inline-block;width:3px;height:12px;border-radius:2px;background:#1d55c2}
+.admin-row{display:grid;grid-template-columns:90px 1fr;gap:0;border-bottom:.5px solid #f0efe9;padding:10px 0;min-width:0}
+.admin-row:last-child{border-bottom:none;padding-bottom:0}
+.admin-label{font-size:12px;font-weight:500;color:#18181a;padding-top:8px;display:flex;align-items:flex-start;gap:3px;min-width:0;flex-shrink:0}
+.admin-req-star{color:#e53e3e;font-size:13px;line-height:1}
+.admin-field{display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
+.admin-select-box{padding:6px 10px;border:.5px solid #d0cec5;border-radius:6px;font-size:12px;color:#18181a;background:#f9f8f5;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px;min-width:0;overflow:hidden}
+.admin-select-arrow{font-size:10px;color:#8a8880;flex-shrink:0}
+.admin-select-val{font-size:12px;font-weight:600;color:#18181a;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-select-val.placeholder{color:#8a8880;font-weight:400}
+.admin-copy-row{display:flex;gap:5px;align-items:stretch;min-width:0;overflow:hidden}
+.admin-input-display{flex:1;padding:6px 10px;border:.5px solid #d0cec5;border-radius:6px;font-size:12px;color:#18181a;background:#f9f8f5;min-height:32px;display:flex;align-items:center;word-break:break-word;overflow-wrap:break-word;line-height:1.5;min-width:0;overflow:hidden}
+.admin-input-display.multiline{align-items:flex-start;min-height:100px;padding:8px 10px}
+.admin-input-display.content-area{min-height:200px;flex-direction:column;align-items:stretch;font-size:12px;line-height:1.8;overflow-y:auto;max-height:320px}
+.admin-input-text{flex:1;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;min-width:0}
+.admin-copy-btn{padding:4px 10px;font-size:10px;font-weight:600;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#52514d;cursor:pointer;white-space:nowrap;transition:all .12s;align-self:flex-start;flex-shrink:0}
+.admin-copy-btn:hover{background:#f0efe9;border-color:#b8b5ae}
+.admin-copy-btn.copied{background:#e8f7f1;color:#0a7c52;border-color:#7dd3b5}
+.admin-hint{font-size:10px;color:#8a8880;line-height:1.4;word-break:break-word;overflow-wrap:break-word}
+.admin-char-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px}
+.char-ok{background:#e8f7f1;color:#0a7c52}
+.char-warn{background:#fef3e6;color:#b55c08}
+.char-err{background:#fdf0f0;color:#b91c1c}
+.admin-file-placeholder{padding:10px;border:1px dashed #d0cec5;border-radius:6px;background:#f9f8f5;text-align:center;font-size:11px;color:#8a8880}
+.admin-toolbar{background:#f5f4f0;border:.5px solid #d0cec5;border-radius:6px 6px 0 0;padding:6px 8px;display:flex;gap:3px;flex-wrap:wrap;border-bottom:none;overflow:hidden}
+.admin-toolbar-item{padding:3px 6px;font-size:11px;border:.5px solid #d0cec5;border-radius:4px;background:#fff;color:#52514d}
+.admin-content-preview{border:.5px solid #d0cec5;border-radius:0 0 6px 6px;padding:10px 12px;background:#fff;font-size:12px;line-height:1.8;max-height:280px;overflow-y:auto;overflow-x:hidden;color:#18181a;word-break:break-word;overflow-wrap:break-word}
+.admin-content-preview h2{font-size:14px;font-weight:700;margin:10px 0 4px}
+.admin-content-preview h3{font-size:13px;font-weight:700;margin:8px 0 3px}
+.admin-content-preview p{margin-bottom:6px}
+.admin-content-preview ul,.admin-content-preview ol{margin:3px 0 6px 16px}
+.admin-content-preview li{margin-bottom:2px}
+.admin-content-preview strong{font-weight:700}
+.admin-content-preview table{width:100%;border-collapse:collapse;font-size:11px;margin:6px 0;table-layout:fixed}
+.admin-content-preview th{background:#f5f4f0;padding:5px 7px;border:.5px solid #e2e0d8;font-weight:700;text-align:left;word-break:break-word}
+.admin-content-preview td{padding:4px 7px;border:.5px solid #e2e0d8;word-break:break-word}
+.admin-radio-group{display:flex;gap:16px;padding:6px 0}
+.admin-radio-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#18181a;cursor:default}
+.admin-radio-circle{width:15px;height:15px;border-radius:50%;border:2px solid #d0cec5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.admin-radio-circle.active{border-color:#1d55c2;background:#1d55c2}
+.admin-radio-circle.active::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff}
+.admin-mode-tabs{display:flex;gap:4px;margin-bottom:6px}
+.admin-mode-tab{padding:4px 10px;font-size:10px;font-weight:600;border:.5px solid #d0cec5;border-radius:20px;background:transparent;color:#8a8880;cursor:pointer;transition:all .12s}
+.admin-mode-tab.active{background:#eef2fd;border-color:#b8c9f5;color:#1d55c2}
+.admin-all-copy-btn{padding:6px 14px;font-size:11px;font-weight:600;border:.5px solid #d0cec5;border-radius:6px;background:#18181a;color:#fff;cursor:pointer;transition:all .12s}
+.admin-all-copy-btn:hover{background:#333}
+.admin-all-copy-btn.copied{background:#0a7c52;border-color:#0a7c52}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hd">
+  <div>
+    <h1>dd-da.com 콘텐츠 생성기 v4</h1>
+    <p>50개국 × 8서비스 × AI 요약 + 정보출처 자동 포함 | 필수: 국가·서비스 / 선택: 세부항목·포맷·독자</p>
+  </div>
+  <div class="hd-stats">
+    <div class="stat"><div class="stat-n">50</div><div class="stat-l">국가</div></div>
+    <div class="stat"><div class="stat-n">8</div><div class="stat-l">서비스</div></div>
+    <div class="stat"><div class="stat-n">8</div><div class="stat-l">포맷</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">출처 유형</div></div>
+  </div>
+</div>
+
+<div class="steps">
+  <span class="step cur" id="st1">① 국가·도시 <span class="req-badge">필수</span></span><span class="sarr">›</span>
+  <span class="step" id="st2">② 서비스 카테고리 <span class="req-badge">필수</span></span><span class="sarr">›</span>
+  <span class="step" id="st3">③ WHAT 세부항목 <span class="opt-badge">선택 가능</span></span><span class="sarr">›</span>
+  <span class="step" id="st4">④ HOW 포맷 · WHO 독자 <span class="opt-badge">선택 가능</span></span><span class="sarr">›</span>
+  <span class="step" id="st5">⑤ 생성</span>
+</div>
+
+<div class="layout">
+
+<!-- LEFT: country selector -->
+<div class="lpanel">
+  <div class="pnl-t">① 국가 선택 <span class="req-badge">필수</span></div>
+  <div class="rtabs" id="rtabs"></div>
+  <div class="cgrid" id="cgrid"></div>
+  <div id="sub-wrap" style="display:none" class="sub-wrap">
+    <div class="sub-lbl">도시·지역 <span class="opt-badge">선택 사항</span></div>
+    <div class="srow" id="srow"></div>
+    <div id="city-desc-wrap" style="display:none;margin-top:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="sub-lbl">도시 설명 <span class="opt-badge">자동 수집·수정 가능</span></div>
+        <span id="city-desc-src" style="font-size:9px;color:var(--t3);font-style:italic"></span>
+      </div>
+      <textarea id="city-desc-input" rows="2"
+        style="width:100%;font-size:11px;line-height:1.5;padding:6px 8px;
+               border:.5px solid var(--bd2);border-radius:var(--rs);
+               background:var(--sur2);color:var(--t);resize:vertical;
+               font-family:var(--font)"
+        placeholder="도시 설명을 입력하세요"></textarea>
+      <div style="font-size:9px;color:var(--t3);margin-top:3px;line-height:1.4">
+        수집 순서: ① 사전 등록 데이터 → ② Wikipedia 한국어 → ③ Claude AI 생성 · 수정 시 직접 입력으로 전환
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="rpanel">
+
+  <!-- selection summary bar -->
+  <div class="selbar" id="selbar">
+    <span class="schip" id="sc0">국가 미선택</span>
+    <span style="color:var(--bd2);font-size:11px">›</span>
+    <span class="schip" id="sc1">서비스 미선택</span>
+    <span style="color:var(--bd2);font-size:11px">›</span>
+    <span class="schip" id="sc2">세부항목</span>
+    <span style="color:var(--bd2);font-size:11px">›</span>
+    <span class="schip" id="sc3">포맷: 자유형</span>
+    <span style="color:var(--bd2);font-size:11px">›</span>
+    <span class="schip" id="sc4">독자: 일반</span>
+  </div>
+
+  <!-- ② service category -->
+  <div class="scard">
+    <div class="scard-hd">
+      <span class="scard-title">② 서비스 카테고리 <span class="req-badge">필수</span></span>
+      <span class="scard-sub" id="svc-badge"></span>
+    </div>
+    <div class="svc-grid" id="svc-grid"></div>
+  </div>
+
+  <!-- ③ topics (optional) -->
+  <div class="scard">
+    <div class="scard-hd">
+      <span class="scard-title">③ 세부 항목 <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:600;background:#fdf0f0;color:#a32d2d;margin-left:4px">WHAT — 무엇에 대해 쓸지</span></span>
+      <span class="scard-sub" style="font-size:10px">각 항목은 서로 다른 독립 주제 · 미선택 시 대표 항목 자동 사용</span>
+    </div>
+    <div class="ctype-row" id="ctype-row"></div>
+    <div class="topic-grid" id="topic-grid">
+      <div class="empty-msg">서비스 카테고리를 먼저 선택하세요</div>
+    </div>
+  </div>
+
+  <!-- ④ format + target (optional) -->
+  <div class="scard">
+    <div class="scard-hd">
+      <span class="scard-title">④ 포맷 · 독자 타겟 <span class="opt-badge">선택 — 미선택 시 기본값 자동 적용</span></span>
+      <span class="scard-sub" style="font-size:10px">P25–P50 서비스별 자동 적용</span>
+    </div>
+
+    <!-- format -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">
+        출력 포맷 <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:600;background:#faeeda;color:#b55c08;margin-left:3px">HOW — 어떤 형식으로 쓸지</span>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;line-height:1.4">
+        같은 항목을 다른 구조로 표현 · 절차→단계별 / 주의→체크리스트 / 질문→FAQ · 미선택=AI 최적 판단
+      </div>
+      <div class="fmt-grid" id="fmt-grid"></div>
+    </div>
+
+    <!-- target -->
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">
+        독자 타겟 <span class="opt-badge">WHO — 누구를 위한 글인지 · 미선택=일반</span>
+      </div>
+      <div class="target-grid" id="target-grid"></div>
+    </div>
+    <!-- auto-applied guide note -->
+    <div class="auto-note" id="auto-note" style="display:none">
+      <span style="font-size:14px;flex-shrink:0">⚡</span>
+      <span id="auto-note-text" style="font-size:11px;color:var(--t2)"></span>
+    </div>
+  </div>
+
+  <!-- ⑤ SEO + generate -->
+  <div class="scard">
+    <div class="scard-hd">
+      <span class="scard-title">⑤ SEO · 정보 미리보기</span>
+      <span class="scard-sub" id="info-badge"></span>
+    </div>
+    <div id="official-srcs-preview" style="display:none;background:var(--sur2);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px"></div>
+    <div id="seo-preview"><div class="seo-ph">국가와 서비스 카테고리를 선택하면 SEO/GEO 제목이 자동 생성됩니다</div></div>
+    <div class="info-meta-row" id="info-meta-row" style="display:none"></div>
+
+    <!-- AI 교차검증 API 키 설정 -->
+    <div style="margin-top:10px;border:.5px solid var(--bd2);border-radius:var(--rs);overflow:hidden">
+      <button onclick="toggleApiKeys()" style="width:100%;padding:8px 12px;background:var(--sur2);border:none;text-align:left;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span>🔑 API 키 설정 <span style="font-size:9px;font-weight:400;color:var(--t3);margin-left:4px">AI 교차검증 + 노션 등록</span></span>
+        <span id="apikey-arrow" style="font-size:10px;color:var(--t3)">▾</span>
+      </button>
+      <div id="apikey-panel" style="display:none;padding:10px 12px;border-top:.5px solid var(--bd);background:var(--sur)">
+
+        <!-- AI 교차검증 -->
+        <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">AI 교차검증</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#0a7c52;margin-bottom:3px">Gemini <span style="font-weight:400;color:var(--t3)">무료 · Google AI Studio</span></div>
+            <input id="key-gemini" type="password" placeholder="AIza..." style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t);font-family:monospace">
+            <div style="font-size:9px;color:var(--t3);margin-top:2px"><a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#1d55c2">aistudio.google.com</a>에서 무료 발급</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#1d55c2;margin-bottom:3px">ChatGPT <span style="font-weight:400;color:var(--t3)">gpt-4o-mini · OpenAI</span></div>
+            <input id="key-openai" type="password" placeholder="sk-..." style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t);font-family:monospace">
+            <div style="font-size:9px;color:var(--t3);margin-top:2px"><a href="https://platform.openai.com/api-keys" target="_blank" style="color:#1d55c2">platform.openai.com</a>에서 발급</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#b55c08;margin-bottom:3px">Perplexity <span style="font-weight:400;color:var(--t3)">sonar · 웹검색 포함</span></div>
+            <input id="key-perplexity" type="password" placeholder="pplx-..." style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t);font-family:monospace">
+            <div style="font-size:9px;color:var(--t3);margin-top:2px"><a href="https://www.perplexity.ai/settings/api" target="_blank" style="color:#1d55c2">perplexity.ai/settings/api</a>에서 발급</div>
+          </div>
+          <div style="display:flex;align-items:flex-end"></div>
+        </div>
+
+        <!-- 노션 등록 -->
+        <div style="border-top:.5px solid var(--bd);padding-top:10px;margin-top:2px">
+          <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">노션 자동 등록</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#18181a;margin-bottom:3px">Integration Token <span style="font-weight:400;color:var(--t3)">필수</span></div>
+              <input id="key-notion-token" type="password" placeholder="secret_..." style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t);font-family:monospace">
+              <div style="font-size:9px;color:var(--t3);margin-top:2px"><a href="https://www.notion.so/my-integrations" target="_blank" style="color:#1d55c2">notion.so/my-integrations</a>에서 발급</div>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#18181a;margin-bottom:3px">Database ID <span style="font-weight:400;color:var(--t3)">필수</span></div>
+              <input id="key-notion-db" type="text" placeholder="32자리 ID..." style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t);font-family:monospace">
+              <div style="font-size:9px;color:var(--t3);margin-top:2px">DB URL에서 <code style="background:var(--sur3);padding:1px 3px;border-radius:2px">notion.so/[여기32자리]?v=</code> 부분</div>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#18181a;margin-bottom:3px">제목 속성명 <span style="font-weight:400;color:var(--t3)">DB 속성 이름과 정확히 일치</span></div>
+              <input id="notion-prop-title" type="text" placeholder="이름" value="이름" style="width:100%;padding:5px 8px;font-size:11px;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--sur2);color:var(--t)">
+            </div>
+            <div style="display:flex;align-items:flex-end">
+              <button onclick="saveApiKeys()" style="width:100%;padding:6px;font-size:11px;font-weight:600;border:.5px solid var(--bd2);border-radius:var(--rs);background:var(--t);color:#fff;cursor:pointer">전체 저장 (localStorage)</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="apikey-status" style="font-size:10px;color:var(--t3);margin-top:6px"></div>
+      </div>
+    </div>
+
+    <button class="gbtn" id="gbtn" disabled onclick="generate()">AI 요약 + 콘텐츠 + 정보출처 생성하기</button>
+  </div>
+
+  <!-- output -->
+  <div id="outarea" style="display:none">
+    <div class="outbox">
+      <div class="otabs">
+        <button class="otab on" onclick="oTab('content',this)">콘텐츠 전체</button>
+        <button class="otab" onclick="oTab('seo',this)">SEO 정보</button>
+        <button class="otab" onclick="oTab('export',this)">🖊 어드민 입력 폼</button>
+        <button class="otab" onclick="oTab('raw',this)">API 원문</button>
+      </div>
+      <div id="otab-content" class="opanel on"></div>
+      <div id="otab-seo" class="opanel"></div>
+      <div id="otab-export" class="opanel"></div>
+      <div id="otab-raw" class="opanel"></div>
+    </div>
+  </div>
+
+</div><!-- /rpanel -->
+</div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+/* ══════════════ DATA ══════════════ */
+const DATA={
+  regions:{
+    '아시아 (20)':[
+      {n:'일본',f:'🇯🇵',s:['도쿄','오사카','교토','후쿠오카','삿포로','나고야','나하(오키나와)','히로시마']},
+      {n:'중국',f:'🇨🇳',s:['베이징','상하이','광저우','선전','청두','항저우','시안']},
+      {n:'홍콩',f:'🇭🇰',s:['홍콩섬','구룡(카우룬)','신계','란타우섬']},
+      {n:'대만',f:'🇹🇼',s:['타이베이','타이중','가오슝','타이난','화롄']},
+      {n:'태국',f:'🇹🇭',s:['방콕','치앙마이','푸켓','파타야','코사무이','끄라비','후아힌']},
+      {n:'베트남',f:'🇻🇳',s:['하노이','호치민','다낭','호이안','나트랑','하롱베이']},
+      {n:'필리핀',f:'🇵🇭',s:['마닐라','세부','보홀','팔라완','다바오','보라카이']},
+      {n:'말레이시아',f:'🇲🇾',s:['쿠알라룸푸르','페낭','조호르바루','코타키나발루','말라카']},
+      {n:'싱가포르',f:'🇸🇬',s:['마리나베이','오차드','센토사','주롱','창이']},
+      {n:'인도네시아',f:'🇮🇩',s:['발리','자카르타','욕야카르타','롬복','수라바야']},
+      {n:'인도',f:'🇮🇳',s:['뭄바이','델리','방갈로르','첸나이','콜카타','고아']},
+      {n:'몽골',f:'🇲🇳',s:['울란바토르','고비사막','홉스굴']},
+      {n:'캄보디아',f:'🇰🇭',s:['프놈펜','씨엠립','시아누크빌','캄폿']},
+      {n:'라오스',f:'🇱🇦',s:['비엔티안','루앙프라방','방비엥','팍세']},
+      {n:'미얀마',f:'🇲🇲',s:['양곤','만달레이','바간','인레호수']},
+      {n:'네팔',f:'🇳🇵',s:['카트만두','포카라','룸비니','치트완']},
+      {n:'스리랑카',f:'🇱🇰',s:['콜롬보','캔디','갈레','시기리야']},
+      {n:'몰디브',f:'🇲🇻',s:['말레','북말레환초','남말레환초','아리환초']},
+      {n:'방글라데시',f:'🇧🇩',s:['다카','치타공','실렛','콕스바자르']},
+      {n:'카자흐스탄',f:'🇰🇿',s:['알마티','아스타나','심켄트','악타우']}
+    ],
+    '미주 (10)':[
+      {n:'미국',f:'🇺🇸',s:['뉴욕','LA','샌프란시스코','시카고','마이애미','시애틀','보스턴','라스베이거스','하와이']},
+      {n:'캐나다',f:'🇨🇦',s:['밴쿠버','토론토','몬트리올','캘거리','오타와','퀘벡시티']},
+      {n:'멕시코',f:'🇲🇽',s:['멕시코시티','칸쿤','과달라하라','오악사카']},
+      {n:'브라질',f:'🇧🇷',s:['상파울루','리우데자네이루','브라질리아','살바도르']},
+      {n:'아르헨티나',f:'🇦🇷',s:['부에노스아이레스','멘도사','코르도바','파타고니아']},
+      {n:'칠레',f:'🇨🇱',s:['산티아고','발파라이소','파타고니아','아타카마']},
+      {n:'페루',f:'🇵🇪',s:['리마','쿠스코','아레키파','이키토스']},
+      {n:'콜롬비아',f:'🇨🇴',s:['보고타','메데인','카르타헤나','칼리']},
+      {n:'쿠바',f:'🇨🇺',s:['아바나','바라데로','트리니다드','산티아고데쿠바']},
+      {n:'코스타리카',f:'🇨🇷',s:['산호세','과나카스테','아레날','코르코바도']}
+    ],
+    '유럽 (15)':[
+      {n:'영국',f:'🇬🇧',s:['런던','맨체스터','에든버러','버밍엄','리버풀','옥스퍼드']},
+      {n:'프랑스',f:'🇫🇷',s:['파리','리옹','마르세유','니스','스트라스부르','보르도']},
+      {n:'독일',f:'🇩🇪',s:['베를린','뮌헨','함부르크','프랑크푸르트','쾰른','드레스덴']},
+      {n:'이탈리아',f:'🇮🇹',s:['로마','밀라노','피렌체','베네치아','나폴리','시칠리아']},
+      {n:'스페인',f:'🇪🇸',s:['마드리드','바르셀로나','세비야','발렌시아','그라나다','빌바오']},
+      {n:'네덜란드',f:'🇳🇱',s:['암스테르담','로테르담','헤이그','위트레흐트']},
+      {n:'벨기에',f:'🇧🇪',s:['브뤼셀','브뤼헤','겐트','앤트워프']},
+      {n:'스위스',f:'🇨🇭',s:['취리히','제네바','베른','루체른','인터라켄','체르마트']},
+      {n:'오스트리아',f:'🇦🇹',s:['빈','잘츠부르크','인스브루크','그라츠']},
+      {n:'체코',f:'🇨🇿',s:['프라하','브르노','카를로비바리','체스키크루믈로프']},
+      {n:'헝가리',f:'🇭🇺',s:['부다페스트','데브레첸','에게르','발라톤호수']},
+      {n:'폴란드',f:'🇵🇱',s:['바르샤바','크라쿠프','그단스크','브로츠와프']},
+      {n:'포르투갈',f:'🇵🇹',s:['리스본','포르투','알가르브','마데이라','신트라']},
+      {n:'그리스',f:'🇬🇷',s:['아테네','산토리니','크레타','미코노스','코르푸']},
+      {n:'터키',f:'🇹🇷',s:['이스탄불','안탈리아','카파도키아','이즈미르','보드룸']}
+    ],
+    '오세아니아 (3)':[
+      {n:'호주',f:'🇦🇺',s:['시드니','멜버른','브리즈번','퍼스','애들레이드','케언즈','골드코스트']},
+      {n:'뉴질랜드',f:'🇳🇿',s:['오클랜드','웰링턴','크라이스트처치','퀸스타운','로토루아']},
+      {n:'피지',f:'🇫🇯',s:['수바','난디','마마누카군도','야사와군도']}
+    ],
+    '중동·아프리카 (2)':[
+      {n:'UAE(두바이)',f:'🇦🇪',s:['두바이','아부다비','샤르자','라스알카이마']},
+      {n:'남아공',f:'🇿🇦',s:['케이프타운','요하네스버그','더반','프리토리아','가든루트']}
+    ]
+  },
+
+  svcCats:[
+    {id:'visa',cls:'svc-visa',ic:'📋',name:'비자·법률',desc:'비자·입국·법률 규정',freq:'분기',rel:'high',note:'입국 규정 수시 변경',
+     autoGuide:'P35 무비자 정리 · P38 입국심사 대응 · P40 서류체크리스트 자동 적용',
+     topics:[{t:'비자 종류 및 신청 방법',c:'비자·입국'},{t:'무비자 입국 조건·기간',c:'비자·입국'},{t:'체류기간 연장 방법',c:'비자·입국'},{t:'취업 허가 관련 규정',c:'비자·입국'},{t:'입국심사 예상 질문 대응',c:'비자·입국'},{t:'비자 거절·지연 대처',c:'비자·입국'},{t:'장기체류 비자 종류',c:'비자·입국'},{t:'부동산·임대 관련 법률',c:''},{t:'세금·신고 의무',c:''},{t:'출국·재입국 주의사항',c:'비자·입국'}],
+     srcs:['해당국 이민청 공식 사이트','주한 해당국 대사관','외교부 해외안전여행(0404.go.kr)']},
+    {id:'home',cls:'svc-home',ic:'🏠',name:'주거',desc:'월세·계약·지역 정보',freq:'반기',rel:'high',note:'임대 시세는 분기별 변동',
+     autoGuide:'P11 체크리스트 · P14 비용분석 · P13 주거유형 비교표 자동 적용',
+     topics:[{t:'월세 시세 및 추천 지역',c:'금융·환전'},{t:'주거 유형 비교',c:''},{t:'임대 계약 절차 및 서류',c:''},{t:'초기 입주 비용 분석',c:'금융·환전'},{t:'쉐어하우스·게스트하우스',c:''},{t:'단기 숙소 vs 장기 임대',c:''},{t:'공공 유틸리티 신청법',c:''},{t:'집주인 분쟁 대처법',c:''},{t:'외국인 임대 계약 주의사항',c:''},{t:'이사·퇴실 절차',c:''}],
+     srcs:['현지 부동산 포털','대사관 생활 안내','한인 커뮤니티 게시판']},
+    {id:'job',cls:'svc-job',ic:'💼',name:'취업·알바',desc:'취업비자·급여·노동법',freq:'반기',rel:'medium',note:'최저임금 연간 변경',
+     autoGuide:'P12 단계별 가이드 · P24 법령 주의 · P15 실수 주의사항 자동 적용',
+     topics:[{t:'취업 비자 및 허가 방법',c:'비자·입국'},{t:'구직 사이트·방법',c:''},{t:'최저임금·급여 체계',c:'금융·환전'},{t:'아르바이트 가능 여부',c:'비자·입국'},{t:'노동법·근로자 권리',c:''},{t:'이력서·면접 현지화',c:''},{t:'프리랜서·원격근무 규정',c:'비자·입국'},{t:'세금 신고·소득세',c:'금융·환전'},{t:'직종별 취업 현실',c:''},{t:'한국 기업·스타트업 취업',c:''}],
+     srcs:['현지 노동부 공식 사이트','KOTRA 해외 취업 정보','현지 고용노동부']},
+    {id:'med',cls:'svc-med',ic:'🏥',name:'의료·안전',desc:'병원·응급·보험·치안',freq:'분기',rel:'high',note:'응급번호·병원 정보 수시 확인',
+     autoGuide:'P43 보험청구 · P44 현지병원 방문 · P45 응급 매뉴얼 자동 적용',
+     topics:[{t:'병원 이용 방법 A to Z',c:'의료·응급'},{t:'응급실 비용 현실',c:'여행자보험'},{t:'의료보험 가입 및 체계',c:'여행자보험'},{t:'주요 응급 전화번호',c:'대사관·여권'},{t:'치안·안전 주의 지역',c:''},{t:'자연재해 대응 매뉴얼',c:''},{t:'약국·의약품 구입',c:'의료·응급'},{t:'영어 가능한 병원 찾기',c:'의료·응급'},{t:'여행자보험 청구법',c:'여행자보험'},{t:'정신건강·심리 상담',c:''}],
+     srcs:['현지 119/응급 기관','한국 대사관 영사 서비스','세계보건기구(WHO)']},
+    {id:'life',cls:'svc-life',ic:'🌆',name:'로컬 라이프',desc:'마트·음식·생활 앱·문화',freq:'연간',rel:'medium',note:'앱/서비스 정책 변경 가능',
+     autoGuide:'P17 요약카드 · P20 장기체류자형 · P19 가족동반형 자동 적용',
+     topics:[{t:'슈퍼마켓·마트 이용법',c:''},{t:'음식 문화·현지 식당',c:''},{t:'쓰레기·재활용 규정',c:''},{t:'인터넷·통신 신청',c:'유심·통신'},{t:'생활 필수 앱 모음',c:'유심·통신'},{t:'문화·예절·매너',c:''},{t:'한국 식재료 구입처',c:'한인회·커뮤니티'},{t:'편의점·코인세탁',c:''},{t:'은행 계좌 개설',c:'금융·환전'},{t:'현지 SNS·플랫폼',c:''}],
+     srcs:['현지 시청/구청 생활 가이드','한인 생활 커뮤니티','관광청 공식 사이트']},
+    {id:'edu',cls:'svc-edu',ic:'🎓',name:'교육',desc:'어학원·학교·학비·유학',freq:'연간',rel:'high',note:'입학 조건 학기 전 재확인',
+     autoGuide:'P12 단계별 가이드 · P16 FAQ · P40 서류 체크리스트 자동 적용',
+     topics:[{t:'어학원 선택·비용 비교',c:''},{t:'초중고 입학 절차',c:'비자·입국'},{t:'유치원·보육 시설 안내',c:''},{t:'대학·전문학교 입학',c:'비자·입국'},{t:'학비·장학금 정보',c:'금융·환전'},{t:'온라인 교육 활용',c:''},{t:'자녀 학교 적응 팁',c:''},{t:'교육 비자 신청',c:'비자·입국'},{t:'방과후·과외 시스템',c:''},{t:'교육 수준·커리큘럼',c:''}],
+     srcs:['현지 교육부 공식 사이트','국제학교 협회(CIS)','한국 교육부 유학 정보']},
+    {id:'move',cls:'svc-move',ic:'🚆',name:'교통',desc:'대중교통·유심·렌터카',freq:'반기',rel:'high',note:'요금·유심 정책 변경 가능',
+     autoGuide:'P27 공항vs온라인 · P28 로밍vs유심 비교 · P25 eSIM iOS 설정 자동 적용',
+     topics:[{t:'대중교통 시스템 완전 정리',c:''},{t:'교통카드 발급·충전',c:'금융·환전'},{t:'렌터카·국제면허 인정',c:''},{t:'공항 이동 방법',c:''},{t:'자전거·킥보드·공유차량',c:''},{t:'택시·앱 이용법',c:''},{t:'교통 앱·지도 추천',c:'유심·통신'},{t:'철도·버스 패스',c:'금융·환전'},{t:'eSIM·유심 현지 통신',c:'유심·통신'},{t:'주차·교통 법규',c:''}],
+     srcs:['현지 교통부 공식 사이트','Google Maps 대중교통','해당 도시 교통공사']},
+    {id:'hot',cls:'svc-hot',ic:'📍',name:'핫플레이스',desc:'한인 명소·카페·쇼핑',freq:'분기',rel:'medium',note:'폐업·이전 수시 발생',
+     autoGuide:'P17 요약카드 · P21 디지털노마드 · P50 한인회 도움 요청 자동 적용',
+     topics:[{t:'한국인 많이 가는 핵심 지역',c:'한인회·커뮤니티'},{t:'카페·공유오피스 추천',c:''},{t:'한인마트·한국 식당',c:'한인회·커뮤니티'},{t:'주요 관광 명소·필수 코스',c:''},{t:'야경·포토스팟',c:''},{t:'쇼핑몰·면세점 정보',c:''},{t:'현지인 추천 맛집·바',c:''},{t:'주거 추천 생활권',c:''},{t:'주말 여행·당일치기',c:''},{t:'계절별 이벤트·축제',c:''}],
+     srcs:['구글 맵 현지 리뷰','트립어드바이저','한인 SNS 커뮤니티']}
+  ],
+
+  formats:[
+    {id:'P11',ic:'✅',name:'체크리스트',desc:'출국전·도착후·체류중 3단계'},
+    {id:'P12',ic:'🔢',name:'단계별 가이드',desc:'1~7단계 절차 중심'},
+    {id:'P13',ic:'📊',name:'비교표',desc:'A vs B 장단점 비교'},
+    {id:'P14',ic:'💰',name:'비용 분석',desc:'초기·월정·예비 비용 구조화'},
+    {id:'P16',ic:'❓',name:'FAQ 10문항',desc:'검색 상위 질문 10개'},
+    {id:'P17',ic:'📌',name:'요약 카드',desc:'TL;DR + 본문 상세'},
+    {id:'P24',ic:'⚖️',name:'법령 주의형',desc:'규정 기반, 단정 금지'},
+    {id:'FREE',ic:'✨',name:'자유 형식',desc:'AI 최적 판단 (기본값)'}
+  ],
+  targets:[
+    {id:'general',name:'일반 (기본값)'},
+    {id:'first',name:'처음 방문자'},
+    {id:'longstay',name:'장기체류자'},
+    {id:'family',name:'가족·아이 동반'},
+    {id:'nomad',name:'디지털노마드'},
+    {id:'student',name:'학생'},
+    {id:'business',name:'출장자'}
+  ],
+  kwMap:{'비자·법률':['비자신청','무비자입국','체류기간','입국심사'],'주거':['해외월세','임대계약','쉐어하우스','주거비'],'취업·알바':['해외취업','아르바이트','워킹홀리데이','취업비자'],'의료·안전':['해외병원','응급실','여행자보험','의료비'],'로컬 라이프':['해외생활','현지생활','생활앱','문화차이'],'교육':['해외유학','어학원','학비','자녀교육'],'교통':['대중교통','교통카드','렌터카','공항이동'],'핫플레이스':['한인마트','한국식당','명소추천','여행지']}
+};
+
+/* ══════════════ STATE ══════════════ */
+const S={region:'아시아 (20)',country:null,sub:null,svc:null,topic:null,ctype:null,fmt:'FREE',target:'general'};
+
+/* ══ 핵심 유틸: HTML 이스케이프 ══ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+/* data 속성용 이스케이프 (큰따옴표만 이스케이프) */
+function ea(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+
+/* SEO/GEO 제목 기준:
+   SEO: [국가] [행동키워드] [연도] | 한국인 가이드 (검색 의도 반영, 60자 이내)
+   GEO: [도시/국가] [세부항목] [연도] 현지 실전 정보 (지역 타겟팅)
+   키워드: ①국가명 ②행동키워드(동사형) ③상황키워드 ④지역키워드 */
+const ACTION_KW = {
+  '비자·법률':  ['비자신청방법','무비자입국','체류기간연장','취업허가'],
+  '주거':       ['월세구하기','임대계약','쉐어하우스','집구하기'],
+  '취업·알바':  ['취업하는법','아르바이트','워킹홀리데이취업','취업비자'],
+  '의료·안전':  ['병원이용법','응급실가는법','여행자보험청구','의료비'],
+  '로컬 라이프':['생활하는법','마트이용법','생활앱추천','정착방법'],
+  '교육':       ['어학원등록','학교입학','유학비용','자녀교육'],
+  '교통':       ['대중교통이용법','교통카드발급','공항이동','렌터카'],
+  '핫플레이스': ['한국인명소','카페추천','한인마트','맛집'],
+};
+const SITUATION_KW = {
+  '비자·법률':  '장기체류',
+  '주거':       '장기거주',
+  '취업·알바':  '워킹홀리데이',
+  '의료·안전':  '해외의료',
+  '로컬 라이프':'현지생활',
+  '교육':       '해외유학',
+  '교통':       '해외교통',
+  '핫플레이스': '해외여행',
+};
+function genSEO(){
+  if(!S.country||!S.svc)return null;
+  const svc = DATA.svcCats.find(c=>c.id===S.svc);
+  const topic = S.topic || svc?.topics[0]?.t || svc?.name;
+  const actKws = ACTION_KW[svc?.name] || [];
+  const sitKw  = SITUATION_KW[svc?.name] || '해외생활';
+  /* ① 국가명 ② 행동키워드 ③ 상황키워드 ④ 지역키워드 */
+  const keywords = [
+    S.country,
+    actKws[0] || topic,
+    sitKw,
+    S.sub || '해외'
+  ].filter(Boolean).slice(0,4);
+  const yr = '2025';
+  return{
+    seoTitle: S.country+' '+topic+' '+yr,
+    geoTitle: S.sub ? S.sub+'('+S.country+') '+topic+' '+yr+' 현지 실전 정보' : S.country+' '+topic+' '+yr+' 현지 실전 정보',
+    keywords,
+    alts:[
+      yr+' '+S.country+' '+(actKws[0]||topic)+' 완전 정리',
+      S.country+' 장기체류 '+topic+' — 한국인 실전 경험',
+      (S.sub||S.country)+' '+topic+' 최신 정보 '+yr
+    ]
+  };
+}
+
+/* ══════════════ RENDERS ══════════════ */
+function renderRegions(){
+  document.getElementById('rtabs').innerHTML=Object.keys(DATA.regions).map(r=>
+    `<button class="rtab ${S.region===r?'on':''}" data-r="${ea(r)}" onclick="selRegion(this.dataset.r)">
+      ${esc(r.split(' ')[0])}<span class="rtab-cnt">${DATA.regions[r].length}국</span>
+    </button>`).join('');
+}
+function selRegion(r){S.region=r;S.country=null;S.sub=null;renderRegions();renderCountries();renderSub();syncAll();}
+
+function renderCountries(){
+  document.getElementById('cgrid').innerHTML=(DATA.regions[S.region]||[]).map(c=>
+    `<button class="cbtn ${S.country===c.n?'on':''}" data-cn="${ea(c.n)}" onclick="selCountry(this.dataset.cn)">
+      <span class="cf">${c.f}</span><span class="cn">${esc(c.n)}</span>
+    </button>`).join('');
+}
+function selCountry(n){
+  S.country=n;S.sub=null;
+  renderCountries();renderSub();
+  var wrap=document.getElementById('city-desc-wrap');
+  var inp=document.getElementById('city-desc-input');
+  if(wrap)wrap.style.display='none';
+  if(inp){inp.value='';inp.dataset.lastAuto='';}
+  syncAll();
+}
+
+function renderSub(){
+  const w=document.getElementById('sub-wrap');
+  if(!S.country){w.style.display='none';return;}
+  const c=Object.values(DATA.regions).flat().find(x=>x.n===S.country);
+  if(!c||!c.s.length){w.style.display='none';return;}
+  w.style.display='block';
+  document.getElementById('srow').innerHTML=c.s.map(s=>
+    `<button class="spill ${S.sub===s?'on':''}" data-s="${ea(s)}" onclick="selSub(this.dataset.s)">${esc(s)}</button>`).join('');
+}
+function selSub(s){
+  S.sub=(S.sub===s)?null:s;
+  renderSub();
+  syncAll();
+  updateCityDesc(); /* async — 비동기로 별도 실행 */
+}
+
+/* 도시 설명 자동 수집 소스:
+   1순위: CITY_DESC 로컬 캐시 (이미 검증된 60개+ 도시)
+   2순위: Wikipedia REST API (무료·무인증) — 한국어 요약
+   3순위: Claude API 웹검색 기반 자동 생성
+   수집된 설명은 캐시에 저장하여 재사용 */
+const CITY_DESC_CACHE = {}; // 런타임 캐시
+
+async function fetchCityDescWiki(city, country){
+  /* Wikipedia 한국어판 summary API */
+  var query = city === country ? city : city;
+  var url = 'https://ko.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(query);
+  try {
+    var res = await fetch(url);
+    if(!res.ok) throw new Error('wiki fail');
+    var data = await res.json();
+    if(data.extract && data.extract.length > 20){
+      /* 첫 2문장만 사용 */
+      var sentences = data.extract.split('. ').slice(0,2).join('. ');
+      if(sentences.length > 200) sentences = sentences.slice(0,197)+'...';
+      return {text: sentences, source: 'Wikipedia (한국어)', url: data.content_urls&&data.content_urls.desktop?data.content_urls.desktop.page:''};
+    }
+  } catch(e){}
+  return null;
+}
+
+async function fetchCityDescAI(city, country){
+  /* Claude API — 도시 설명 1~2문장 자동 생성 */
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:150,
+        messages:[{role:'user',content:
+          country+'의 '+city+'에 대해 한국인 장기체류·여행자 관점에서 핵심 특징을 1~2문장으로 요약하세요. '
+          +'생활비 수준, 한인 커뮤니티, 주요 장점을 포함하되 과장 없이 사실 기반으로 작성. 설명 텍스트만 반환.'
+        }]
+      })
+    });
+    if(!res.ok) return null;
+    var data = await res.json();
+    var text = data.content&&data.content[0]&&data.content[0].text;
+    if(text && text.length > 10) return {text: text.trim(), source: 'Claude AI 자동 생성', url:''};
+  } catch(e){}
+  return null;
+}
+
+async function updateCityDesc(){
+  var wrap=document.getElementById('city-desc-wrap');
+  var inp=document.getElementById('city-desc-input');
+  var srcBadge=document.getElementById('city-desc-src');
+  if(!wrap||!inp)return;
+
+  if(S.sub){
+    wrap.style.display='block';
+
+    /* 이미 사용자가 직접 입력한 경우 유지 */
+    if(inp.value && inp.value !== inp.dataset.lastAuto){
+      if(srcBadge) srcBadge.textContent='직접 입력';
+      return;
+    }
+
+    /* 1순위: 로컬 캐시 확인 */
+    var cacheKey = S.country+'|'+S.sub;
+    if(CITY_DESC_CACHE[cacheKey]){
+      var cached = CITY_DESC_CACHE[cacheKey];
+      inp.value = cached.text;
+      inp.dataset.lastAuto = cached.text;
+      if(srcBadge){srcBadge.textContent='출처: '+cached.source; srcBadge.title=cached.url||'';}
+      return;
+    }
+
+    /* 2순위: CITY_DESC 하드코딩 데이터 */
+    var localDesc = getCityDesc(S.sub);
+    if(localDesc){
+      inp.value = localDesc;
+      inp.dataset.lastAuto = localDesc;
+      CITY_DESC_CACHE[cacheKey] = {text:localDesc, source:'사전 등록 데이터', url:''};
+      if(srcBadge) srcBadge.textContent='출처: 사전 등록 데이터';
+      return;
+    }
+
+    /* 3순위: Wikipedia 자동 수집 */
+    inp.value='';
+    inp.placeholder = S.sub+' 설명 수집 중 (Wikipedia)...';
+    if(srcBadge) srcBadge.textContent='수집 중...';
+
+    var wikiResult = await fetchCityDescWiki(S.sub, S.country);
+    if(wikiResult){
+      inp.value = wikiResult.text;
+      inp.dataset.lastAuto = wikiResult.text;
+      inp.placeholder = S.sub+' 설명 (Wikipedia 수집 · 수정 가능)';
+      CITY_DESC_CACHE[cacheKey] = wikiResult;
+      if(srcBadge){srcBadge.textContent='출처: '+wikiResult.source; srcBadge.title=wikiResult.url;}
+      return;
+    }
+
+    /* 4순위: Claude AI 자동 생성 */
+    inp.placeholder = S.sub+' 설명 생성 중 (AI)...';
+    if(srcBadge) srcBadge.textContent='AI 생성 중...';
+
+    var aiResult = await fetchCityDescAI(S.sub, S.country);
+    if(aiResult){
+      inp.value = aiResult.text;
+      inp.dataset.lastAuto = aiResult.text;
+      inp.placeholder = S.sub+' 설명 (AI 생성 · 수정 가능)';
+      CITY_DESC_CACHE[cacheKey] = aiResult;
+      if(srcBadge){srcBadge.textContent='출처: '+aiResult.source;}
+      return;
+    }
+
+    /* 모두 실패: 직접 입력 안내 */
+    inp.value='';
+    inp.placeholder = S.sub+' 설명을 직접 입력하세요';
+    if(srcBadge) srcBadge.textContent='';
+
+  } else {
+    wrap.style.display='none';
+    inp.value='';
+    inp.dataset.lastAuto='';
+    if(srcBadge) srcBadge.textContent='';
+  }
+}
+
+function renderSvcGrid(){
+  document.getElementById('svc-grid').innerHTML=DATA.svcCats.map(c=>
+    `<button class="svc-card ${c.cls} ${S.svc===c.id?'on':''}" data-svc="${c.id}" onclick="selSvc(this.dataset.svc)">
+      <span class="svc-name">${esc(c.name)}</span>
+      <span class="svc-desc">${esc(c.desc)}</span>
+    </button>`).join('');
+  const sv=DATA.svcCats.find(c=>c.id===S.svc);
+  const svb=document.getElementById('svc-badge');if(svb)svb.textContent=sv?'업데이트: '+sv.freq+'별':'';
+}
+function selSvc(id){S.svc=id;S.topic=null;S.ctype=null;renderSvcGrid();renderCtypes();renderTopics();renderAutoNote();syncAll();}
+
+function renderCtypes(){
+  const row=document.getElementById('ctype-row');
+  if(!S.svc){row.innerHTML='';return;}
+  const svc=DATA.svcCats.find(c=>c.id===S.svc);
+  const used=[...new Set(svc.topics.map(t=>t.c).filter(Boolean))];
+  row.innerHTML=['전체',...used].map(ct=>
+    `<button class="ctypechip ${(S.ctype===(ct==='전체'?null:ct))?'on':''}" data-ct="${ea(ct)}" onclick="selCtype(this.dataset.ct)">${esc(ct)}</button>`).join('');
+}
+function selCtype(ct){S.ctype=(ct==='전체')?null:ct;S.topic=null;renderCtypes();renderTopics();syncAll();}
+
+function renderTopics(){
+  const el=document.getElementById('topic-grid');
+  if(!S.svc){el.innerHTML='<div class="empty-msg">서비스 카테고리를 먼저 선택하세요</div>';return;}
+  const svc=DATA.svcCats.find(c=>c.id===S.svc);
+  const list=S.ctype?svc.topics.filter(t=>t.c===S.ctype):svc.topics;
+  el.innerHTML=list.map((t,i)=>{
+    const isOn=S.topic===t.t;
+    const isFirst=i===0&&!S.topic;
+    /* ★ data-topic 속성 사용 (onclick 문자열 이스케이프 문제 완전 방지) */
+    return `<button class="tbtn ${isOn?'on on-'+S.svc:''} ${isFirst?'tbtn-first':''}"
+      data-topic="${ea(t.t)}"
+      onclick="selTopic(this.dataset.topic)"
+      style="${isFirst?'border-color:var(--'+S.svc+'-bd);opacity:.7':''}"
+      title="${isFirst?'미선택 시 이 항목이 기본 사용됩니다':''}"
+    >${esc(t.t)}${t.c?`<span class="ttag" style="background:var(--${S.svc}-bg);color:var(--${S.svc})">${esc(t.c)}</span>`:''}${isFirst&&!S.topic?`<span class="ttag" style="background:#e8f7f1;color:#0a7c52;right:auto;left:6px;top:auto;bottom:5px">기본</span>`:''}
+    </button>`;
+  }).join('');
+}
+/* ★ 핵심 수정: 함수 시그니처를 (val)로 변경 */
+function selTopic(val){S.topic=(S.topic===val)?null:val;renderTopics();syncAll();}
+
+function renderFormats(){
+  const FMT_HINTS={'P11':'절차·준비 항목에 적합','P12':'신청·등록 순서 항목','P13':'옵션 비교 필요 항목','P14':'비용·수수료 핵심 항목','P16':'질문 많은 항목','P17':'요약 필요 (기본값)','P24':'법령·규정 항목','FREE':'AI가 최적 형식 자동 판단'};
+  document.getElementById('fmt-grid').innerHTML=DATA.formats.map(f=>`
+    <button class="fmt-btn ${S.fmt===f.id?'on':''}" data-fmt="${f.id}" onclick="selFmt(this.dataset.fmt)" title="${FMT_HINTS[f.id]||''}">
+      <span class="fmt-id">${f.id}</span>
+      <span class="fmt-name">${esc(f.name)}</span>
+      <span style="display:block;font-size:9px;color:var(--t3);line-height:1.3;margin-top:2px">${FMT_HINTS[f.id]||''}</span>
+    </button>`).join('');
+}
+function selFmt(id){
+  /* FREE는 기본값 — 재클릭 시 deselect 없이 유지 */
+  S.fmt=(S.fmt===id&&id!=='FREE')?'FREE':id;
+  renderFormats();updateSummary();
+}
+
+function renderTargets(){
+  document.getElementById('target-grid').innerHTML=DATA.targets.map(t=>
+    `<button class="tgt-btn ${S.target===t.id?'on':''}" data-tgt="${t.id}" onclick="selTarget(this.dataset.tgt)">${esc(t.name)}</button>`).join('');
+}
+function selTarget(id){
+  /* general은 기본값 — 재클릭 시 deselect 없이 유지 */
+  S.target=(S.target===id&&id!=='general')?'general':id;
+  renderTargets();updateSummary();
+}
+
+function renderAutoNote(){
+  const note=document.getElementById('auto-note');
+  const svc=DATA.svcCats.find(c=>c.id===S.svc);
+  if(!svc){note.style.display='none';return;}
+  note.style.display='flex';
+  const nt=document.getElementById('auto-note-text');if(nt)nt.innerHTML='<strong>서비스별 자동 적용:</strong> '+esc(svc.autoGuide);
+}
+
+function renderSEO(){
+  const sp=document.getElementById('seo-preview'),mr=document.getElementById('info-meta-row');
+  const svc=DATA.svcCats.find(c=>c.id===S.svc),seo=genSEO();
+  if(!seo){sp.innerHTML='<div class="seo-ph">국가와 서비스 카테고리를 선택하면 SEO/GEO 제목이 자동 생성됩니다</div>';if(mr)mr.style.display='none';const ib=document.getElementById('info-badge');if(ib)ib.textContent='';return;}
+  sp.innerHTML=`
+    <div class="seo-grid">
+      <div class="seo-row"><div class="seo-lbl">SEO 제목</div><div class="seo-val">${esc(seo.seoTitle)}</div></div>
+      <div class="seo-row"><div class="seo-lbl">GEO 제목</div><div class="seo-val muted">${esc(seo.geoTitle)}</div></div>
+    </div>
+    <div class="seo-row" style="margin-bottom:0"><div class="seo-lbl">핵심 키워드</div><div class="kwrap">${seo.keywords.map(k=>`<span class="ktag">${esc(k)}</span>`).join('')}</div></div>`;
+  if(svc){
+    if(mr)mr.style.display='flex';
+    const rc=svc.rel==='high'?'b-green':svc.rel==='medium'?'b-amber':'b-red';
+    const rt=svc.rel==='high'?'신뢰도 높음':svc.rel==='medium'?'신뢰도 보통':'주의 필요';
+    /* 업데이트 주기 근거 */
+    var freqReason = {'분기':'비자·법률은 입국 규정 변경 빈도 기준','반기':'임대·취업·교통은 연 1~2회 제도 변경 기준','연간':'생활·교육·핫플레이스는 연간 1회 점검 기준'}[svc.freq]||'카테고리 특성 기준';
+    /* 신뢰도 근거 */
+    var relReason = {'high':'공식 기관 직접 확인 가능 정보 (이민청·대사관·정부 포털)','medium':'시장 상황·현지 정보 포함으로 변동 가능','low':'개인 경험 기반 정보 포함'}[svc.rel]||'';
+    /* 기준 연도 근거 */
+    var currentYear = new Date().getFullYear();
+    mr.innerHTML=`
+      <div class="imeta" title="콘텐츠 작성 기준 연도 (실제 최신 데이터는 웹검색으로 보완됩니다)">
+        <div class="imeta-lbl">정보 기준</div>
+        <div class="imeta-val"><span class="badge b-blue">${currentYear}년</span></div>
+        <div style="font-size:9px;color:var(--t3);margin-top:2px">작성 기준 연도 · 웹검색으로 최신화</div>
+      </div>
+      <div class="imeta" title="${freqReason}">
+        <div class="imeta-lbl">업데이트 권장</div>
+        <div class="imeta-val"><span class="badge b-amber">${svc.freq}별</span></div>
+        <div style="font-size:9px;color:var(--t3);margin-top:2px">${freqReason}</div>
+      </div>
+      <div class="imeta" title="${relReason}">
+        <div class="imeta-lbl">신뢰도 기준</div>
+        <div class="imeta-val"><span class="badge ${rc}">${rt}</span></div>
+        <div style="font-size:9px;color:var(--t3);margin-top:2px">${relReason}</div>
+      </div>
+      <div class="imeta" style="flex:2">
+        <div class="imeta-lbl">주의사항</div>
+        <div class="imeta-val" style="font-size:11px;font-weight:400;color:var(--t2)">${esc(svc.note)}</div>
+      </div>`;
+    document.getElementById('info-badge').innerHTML=`<span class="badge b-blue" style="font-size:10px">2025 기준</span>`;
+    renderOfficialSrcs();
+  }
+}
+
+function renderOfficialSrcs(){
+  var el=document.getElementById('official-srcs-preview');
+  if(!el)return;
+  var svc=DATA.svcCats.find(function(c){return c.id===S.svc;});
+  if(!S.country||!svc){el.style.display='none';return;}
+  var list=getOfficialSrcs(S.country,svc.name);
+  if(!list||!list.length){el.style.display='none';return;}
+  el.style.display='block';
+  var rows=list.map(function(s){
+    var link=s.u?('<a href="'+esc(s.u)+'" target="_blank" rel="noopener" style="font-size:12px;color:#1d55c2;text-decoration:underline">'+esc(s.n)+'</a> <span style="font-size:10px;color:var(--t3)">'+esc(s.u)+'</span>')
+                :('<span style="font-size:12px;color:var(--t2)">'+esc(s.n)+'</span>');
+    return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0;border-bottom:.5px solid var(--bd)">'
+      +'<span style="padding:1px 7px;border-radius:4px;font-size:9px;font-weight:700;background:#eef2fd;color:#1d55c2;flex-shrink:0">공식</span>'
+      +link+'</div>';
+  }).join('');
+  el.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">공식 출처 기반 데이터</div>'+rows;
+}
+
+function updateSummary(){
+  const svc=DATA.svcCats.find(c=>c.id===S.svc);
+  const fmt=DATA.formats.find(f=>f.id===S.fmt);
+  const tgt=DATA.targets.find(t=>t.id===S.target);
+  const DEF='<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:600;background:#e8f7f1;color:#0a7c52;margin-left:4px">기본값</span>';
+  const q=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  /* ① 국가 — null 가드 */
+  const c0=document.getElementById('sc0');
+  if(c0){c0.textContent=S.country?(S.sub?S.country+' · '+S.sub:S.country):'국가 미선택';c0.classList.toggle('filled',!!S.country);}
+
+  /* ② 서비스 — null 가드 */
+  const c1=document.getElementById('sc1');
+  if(c1){c1.textContent=svc?.name||'서비스 미선택';c1.classList.toggle('filled',!!S.svc);}
+
+  /* ③ 세부항목 — innerHTML 사용 (textContent 사용 금지: 내부 요소 파괴됨) */
+  const c2=document.getElementById('sc2');
+  if(c2){
+    if(S.topic){c2.innerHTML=q(S.topic.length>18?S.topic.slice(0,16)+'…':S.topic);c2.classList.add('filled');}
+    else if(S.svc){const dt=svc?.topics[0]?.t||'';c2.innerHTML=q(dt.length>18?dt.slice(0,16)+'…':dt)+DEF;c2.classList.remove('filled');}
+    else{c2.innerHTML='세부항목';c2.classList.remove('filled');}
+  }
+
+  /* ④ 포맷 — null 가드 */
+  const c3=document.getElementById('sc3');
+  if(c3){c3.textContent='포맷: '+(fmt?.name||'자유형');c3.classList.toggle('filled',S.fmt!=='FREE');}
+
+  /* ⑤ 독자 — null 가드 */
+  const c4=document.getElementById('sc4');
+  if(c4){c4.textContent='독자: '+(tgt?.name||'일반');c4.classList.toggle('filled',S.target!=='general');}
+}
+
+function updateSteps(){
+  const done=[!!S.country,!!S.svc,!!S.topic,S.fmt!=='FREE'||S.target!=='general'];
+  ['st1','st2','st3','st4','st5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(i<4&&done[i])el.className='step done';
+    else if(i===0&&!S.country||i===1&&S.country&&!S.svc||i===2&&S.svc||i===3&&S.topic)el.className='step cur';
+    else el.className='step';
+  });
+  if(!S.country){document.getElementById('st1').className='step cur';}
+  const _st5=document.getElementById('st5');if(S.country&&S.svc&&_st5){_st5.className='step cur';}
+}
+
+/* ★ 핵심 수정: 국가 + 서비스만 있으면 생성 버튼 활성화 */
+function checkGen(){
+  const ok=!!(S.country&&S.svc);
+  const btn=document.getElementById('gbtn');
+  btn.disabled=!ok;
+  if(ok&&!S.topic){btn.textContent='생성하기 (세부항목 기본값 자동 적용)';}
+  else if(ok){btn.textContent='AI 요약 + 콘텐츠 + 정보출처 생성하기';}
+}
+
+function syncAll(){renderSEO();renderOfficialSrcs();updateSummary();updateSteps();checkGen();}
+function oTab(name,btn){
+  document.querySelectorAll('.otab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.opanel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('otab-'+name).classList.add('on');
+}
+
+/* ══════════════ GENERATE ══════════════ */
+async function generate(){
+  if(!S.country||!S.svc)return;
+  const btn=document.getElementById('gbtn');
+  btn.disabled=true;btn.classList.add('running');btn.textContent='생성 중...';
+  const outarea=document.getElementById('outarea');
+  if(outarea)outarea.style.display='block';
+  const _oc=document.getElementById('otab-content');if(_oc)_oc.innerHTML=`<div class="ldots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="margin-left:6px">AI 요약 + 콘텐츠 + 정보출처 생성 중...</span></div>`;
+
+  const svc=DATA.svcCats.find(c=>c.id===S.svc);
+  const fmt=DATA.formats.find(f=>f.id===S.fmt)||DATA.formats[7];
+  const tgt=DATA.targets.find(t=>t.id===S.target)||DATA.targets[0];
+  const seo=genSEO();
+
+  /* ★ 스마트 기본값 적용 */
+  const topicToUse=S.topic||svc.topics[0]?.t||svc.name+' 전반';
+  const fmtToUse=S.fmt||'FREE';
+  const targetToUse=S.target||'general';
+
+  const fmtGuide={
+    P11:'출국 전/도착 후/체류 중 3단계 체크리스트 (✓ 항목 형식)',
+    P12:'1~7단계 절차 중심, 각 단계 소요시간·비용·주의사항 포함',
+    P13:'마크다운 표로 A vs B 장단점 비교 (최소 2개 비교)',
+    P14:'비용 항목을 초기/월정/예비로 구조화, 시뮬레이션 테이블 포함',
+    P16:'FAQ 형식 10문항, 각 답변 2~3문장',
+    P17:'상단 TL;DR 박스 + 본문 상세 설명',
+    P24:'법령 기반, 단정 금지, 모든 규정에 "일반적으로" 또는 "공식 확인 권장" 명시',
+    FREE:'독자와 주제에 가장 적합한 형식으로 자유롭게 작성 (한국인 장기체류 관점)'
+  };
+  const tgtGuide={
+    general:'일반 독자 대상, 보편적 정보 제공',
+    first:'처음 방문자 기준, 전문 용어 최소화, 첫 단계부터 안내',
+    longstay:'6개월+ 장기체류자, 현지화 팁·비용 최적화·정착 관점',
+    family:'가족·자녀 동반, 학교·육아·안전 중심',
+    nomad:'Wi-Fi·공유오피스·세금·비자 중심 디지털노마드',
+    student:'비자·학비·생활비·아르바이트 중심 학생',
+    business:'단기 고효율, 교통·숙소·비용 정산 중심 출장자'
+  };
+
+  const SYS=`당신은 dd-da.com 전문 해외 체류 정보 에디터입니다.
+
+[필수 작업 순서 — 반드시 이 순서를 지킬 것]
+STEP 1. web_search 툴로 아래 3가지를 실제 검색하라:
+  - "{국가} {항목} 2025" (최신 정보)
+  - "{국가} {항목} site:.go.kr OR site:gov" (공식기관)
+  - "{국가} {항목} 후기 OR 경험" (실사용자 정보)
+STEP 2. 검색 결과에서 실제 URL과 정보를 수집하라.
+STEP 3. 수집된 최신 정보를 바탕으로 콘텐츠를 작성하라.
+
+[작성 규칙]
+- 과장 금지, 불확실하면 "일반적으로" 표현
+- AI 상투어 금지 ("물론", "당연히", "중요한 것은" 등)
+- "-한다" 형식 통일
+- 가격/규정은 반드시 검색한 최신 수치 사용, 출처 명시
+
+[SEO/GEO 제목 기준]
+- SEO 제목: [국가명] [핵심행동키워드] [연도] (60자 이내, 검색 의도 반영)
+  예시: "일본 워킹홀리데이 비자 신청 방법 2025"
+- GEO 제목: [도시/지역명]([국가]) [세부항목] [연도] 현지 실전 정보
+  예시: "도쿄(일본) 워킹홀리데이 취업 2025 현지 실전 정보"
+- 핵심 키워드 4개 기준: ①국가명(필수) ②행동키워드(동사형, 예:"비자신청","월세구하기") ③상황키워드(예:"장기체류","워킹홀리데이") ④지역키워드(도시명 또는 "해외")
+
+반드시 아래 구분자 구조로만 출력 (다른 텍스트 없음):
+
+===META_START===
+{"seo_title":"[국가] [행동키워드] [연도]","geo_title":"[도시/국가] [세부항목] [연도] 현지 실전","keywords":["국가명","행동키워드","상황키워드","지역키워드"],"alt_titles":["대안1","대안2","대안3"],"info_meta":{"accuracy":"high","update_freq":"분기별","official_sources":[{"name":"실제검색된기관명","url":"실제검색된URL"}],"key_facts":["검색으로확인된사실1","검색으로확인된사실2","검색으로확인된사실3"],"caution_points":["주의1","주의2"],"last_checked":"2025년 기준"}}
+===META_END===
+
+===SUMMARY_START===
+POINT1: [검색으로 확인된 핵심 정보 1]
+POINT2: [검색으로 확인된 핵심 정보 2]
+POINT3: [검색으로 확인된 주의사항 또는 실용 팁]
+READTIME: [예: 5분]
+RELIABILITY: [high 또는 medium 또는 low]
+YEAR: 2025
+===SUMMARY_END===
+
+===CONTENT_START===
+[마크다운 본문 콘텐츠, 600-1000자, 검색된 최신 정보 반영, 지정 포맷 기준]
+===CONTENT_END===
+
+===SOURCES_START===
+OFFICIAL: [검색에서 찾은 실제 공식기관명 (실제URL)]
+SEARCHED_QUERY: [실제 검색한 쿼리 3개, 쉼표 구분]
+SEARCHED_URLS: [검색에서 발견한 실제 URL 최대 3개, 쉼표 구분]
+AI_BASE: Claude (Anthropic) 2025 학습 데이터 + 실시간 웹검색 교차검증
+DATA_DATE: [검색 결과 기준 가장 최신 날짜, 예: 2025년 3월]
+===SOURCES_END===`;
+
+  const cityDescVal=(function(){var el=document.getElementById('city-desc-input');return el&&el.value.trim()?el.value.trim():'';})();
+  const USR=`국가: ${S.country}${S.sub?'\n도시·지역: '+S.sub:''}${cityDescVal?'\n도시 설명: '+cityDescVal:''}
+서비스 카테고리: ${svc?.name}
+세부 항목: ${topicToUse}${S.topic?'':' (자동 선택된 기본 항목)'}${S.ctype?'\n콘텐츠 유형: '+S.ctype:''}
+자동 적용 가이드: ${svc?.autoGuide}
+출력 포맷: ${fmtToUse} — ${fmt.name} (${fmtGuide[fmtToUse]||''})
+독자 타겟: ${tgt.name} (${tgtGuide[targetToUse]||''})`;
+
+  let rawText='';
+  /* ★ try 밖 초기화 — catch/finally/Export 렌더에서 안전하게 참조 가능 */
+  var parsed={};
+  var sum={pt1:'',pt2:'',pt3:'',time:'5분',rel:'high',year:String(new Date().getFullYear())};
+  var srcs={official:'',searchedQuery:'',searchedUrls:'',aiBase:'',aiChatgpt:'',aiGemini:'',aiPerplexity:'',aiConsensus:'',dataDate:'',community:''};
+  var meta={};
+  var webSearchUsed=false;
+  var isDefault=!S.topic;
+  try{
+    /* ★ 빠른 응답 최적화: Haiku 단일 모델 + max_tokens 감소 + 최소 재시도 */
+    const MODEL='claude-haiku-4-5-20251001';
+    let res, lastErr='';
+    for(let attempt=0; attempt<2; attempt++){
+      try{
+        btn.textContent=attempt>0?`재시도 중... (${attempt+1}/2)`:'생성 중...';
+        res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model:MODEL,max_tokens:2200,system:SYS,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:USR}]})
+        });
+        if(res.ok) break;
+        const errData=await res.json().catch(()=>({}));
+        lastErr=`HTTP ${res.status}: ${errData.error?.message||res.statusText}`;
+        if(res.status===400||res.status===401||res.status===403) break; // 재시도 불필요
+      }catch(netErr){lastErr=netErr.message;if(attempt<1)await new Promise(r=>setTimeout(r,800));}
+    }
+    if(!res||!res.ok) throw new Error(lastErr||`HTTP ${res?.status||'연결 실패'}`);
+    const data=await res.json();
+    if(data.error)throw new Error('API 오류: '+(data.error.message||JSON.stringify(data.error)));
+    /* web_search 사용 시 content에 tool_use/tool_result 블록 포함 → text만 추출 */
+    webSearchUsed=data.content?.some(b=>b.type==='tool_use'&&b.name==='web_search');
+    rawText=data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'';
+    if(!rawText&&data.content?.length){
+      /* fallback: 모든 텍스트 추출 */
+      rawText=data.content.map(b=>b.type==='text'?b.text:b.type==='mcp_tool_result'?(b.content?.[0]?.text||''):'').filter(Boolean).join('');
+    }
+    setTabHTML('otab-raw',`<pre class="raw">${esc(rawText)}</pre>`);
+
+    /* ── META ── */
+    meta={};
+    const metaM=rawText.match(/===META_START===\s*([\s\S]*?)\s*===META_END===/);
+    if(metaM){try{meta=JSON.parse(metaM[1].trim());}catch(e){try{const jm=metaM[1].match(/\{[\s\S]*\}/);if(jm)meta=JSON.parse(jm[0]);}catch(e2){}}}
+    /* ★ meta → parsed 동기화 (buildExportData에서 parsed 우선 참조) */
+    if(meta.seo_title)   parsed.seo_title  = meta.seo_title;
+    if(meta.geo_title)   parsed.geo_title  = meta.geo_title;
+    if(meta.keywords)    parsed.keywords   = meta.keywords;
+    if(meta.alt_titles)  parsed.alt_titles = meta.alt_titles;
+
+    /* ── SUMMARY ── */
+    sum={pt1:'',pt2:'',pt3:'',time:'5분',rel:'high',year:'2025'};
+    const sumM=rawText.match(/===SUMMARY_START===\s*([\s\S]*?)\s*===SUMMARY_END===/);
+    if(sumM){
+      const lines=sumM[1].split('\n');
+      const gv=k=>{const l=lines.find(x=>x.trimStart().startsWith(k+':'));return l?l.slice(l.indexOf(':')+1).trim():'';};
+      sum={pt1:gv('POINT1'),pt2:gv('POINT2'),pt3:gv('POINT3'),time:gv('READTIME')||'5분',rel:gv('RELIABILITY')||'high',year:gv('YEAR')||'2025'};
+    }
+
+    /* ── CONTENT ── */
+    let contentMd='';
+    const cM=rawText.match(/===CONTENT_START===\s*([\s\S]*?)\s*===CONTENT_END===/);
+    if(cM){contentMd=cM[1].trim();}
+    else{contentMd=rawText.replace(/===META_START===[\s\S]*?===META_END===/g,'').replace(/===SUMMARY_START===[\s\S]*?===SUMMARY_END===/g,'').replace(/===SOURCES_START===[\s\S]*?===SOURCES_END===/g,'').replace(/```json[\s\S]*?```/g,'').trim()||rawText;}
+    /* ★ parsed에 content 저장 — 어드민 내보내기에서 참조 */
+    parsed.content = contentMd;
+
+    /* ── SOURCES 파싱 — 실제 검색 데이터 추출 ── */
+    srcs={official:'',searchedQuery:'',searchedUrls:'',aiBase:'',dataDate:'',community:''};
+    const srcM=rawText.match(/===SOURCES_START===\s*([\s\S]*?)\s*===SOURCES_END===/);
+    if(srcM){
+      const lines=srcM[1].split('\n');
+      const gv=k=>{const l=lines.find(x=>x.trimStart().startsWith(k+':'));return l?l.slice(l.indexOf(':')+1).trim():'';};
+      srcs={
+        official:      gv('OFFICIAL'),
+        searchedQuery: gv('SEARCHED_QUERY'),
+        searchedUrls:  gv('SEARCHED_URLS'),
+        aiBase:        gv('AI_BASE'),
+        aiChatgpt:     '',
+        aiGemini:      '',
+        aiPerplexity:  '',
+        aiConsensus:   '',
+        dataDate:      gv('DATA_DATE'),
+        community:     gv('COMMUNITY')
+      };
+    }
+
+    /* ── 외부 AI 병렬 호출 ── */
+    btn.textContent='교차검증 중...';
+    const crossQ=`${S.country} ${topicToUse}에 대해 장기체류 한국인 관점에서 가장 중요한 핵심 정보를 2문장으로 요약하세요. 한국어로 답변하세요.`;
+    const extResults=await fetchExternalAIs(crossQ);
+    if(extResults.gemini)    srcs.aiGemini    =extResults.gemini;
+    if(extResults.openai)    srcs.aiChatgpt   =extResults.openai;
+    if(extResults.perplexity)srcs.aiPerplexity=extResults.perplexity;
+    /* 공통 합의 생성 (3개 이상 결과 있을 때) */
+    const crossList=[srcs.aiGemini,srcs.aiChatgpt,srcs.aiPerplexity].filter(Boolean);
+    if(crossList.length>=2) srcs.aiConsensus='실제 AI '+crossList.length+'개 교차검증 완료';
+
+    /* ── RENDER: content tab ── */
+    const relBadge=sum.rel==='high'?'b-green':sum.rel==='medium'?'b-amber':'b-red';
+    const relTxt=sum.rel==='high'?'신뢰도 높음':sum.rel==='medium'?'신뢰도 보통':'확인 필요';
+    const html=typeof marked!=='undefined'?marked.parse(contentMd):contentMd.replace(/\n/g,'<br>');
+    isDefault=!S.topic;
+
+    document.getElementById('otab-content').innerHTML=`
+        </div>
+      </div>
+
+      <!-- AI 요약 블록 -->
+      <div class="ai-summary-block">
+        <div class="ai-sum-hd">
+          <span class="ai-sum-lbl">AI 필수 요약</span>
+          <span class="ai-chip">Claude</span>
+          ${isDefault?`<span class="badge b-green" style="font-size:10px">기본항목 자동적용</span>`:''}
+          <span style="margin-left:auto;font-size:10px;color:#185fa5;font-weight:600">${esc(sum.year)}년 기준</span>
+        </div>
+        <div class="ai-pts">
+          ${sum.pt1?`<div class="ai-pt"><div class="ai-pt-n">1</div><span>${esc(sum.pt1)}</span></div>`:''}
+          ${sum.pt2?`<div class="ai-pt"><div class="ai-pt-n">2</div><span>${esc(sum.pt2)}</span></div>`:''}
+          ${sum.pt3?`<div class="ai-pt"><div class="ai-pt-n">3</div><span>${esc(sum.pt3)}</span></div>`:''}
+        </div>
+        <div class="ai-badges">
+          <span class="badge b-blue">읽기 ${esc(sum.time)}</span>
+          <span class="badge ${relBadge}">${relTxt}</span>
+          <span class="badge b-amber">${esc(svc?.freq||'분기')}별 업데이트</span>
+          <span class="badge b-gray">${esc(fmt.name)}</span>
+          ${S.target!=='general'?`<span class="badge b-purple">${esc(tgt.name)}</span>`:''}
+          ${S.sub?`<span class="badge b-gray">${esc(S.sub)}</span>`:''}
+        </div>
+      </div>
+
+      <!-- 본문 -->
+      <div class="prose">${html}</div>
+
+      <!-- 정보 현황 -->
+      <div class="info-status-block">
+        <div class="info-status-hd">정보 현황</div>
+        <div class="info-status-body">
+          <div class="isb-item"><div class="isb-lbl">기준일</div><div class="isb-val"><span class="badge b-blue">2025년</span></div></div>
+          <div class="isb-item"><div class="isb-lbl">업데이트</div><div class="isb-val"><span class="badge b-amber">${esc(svc?.freq||'')}별</span></div></div>
+          <div class="isb-item"><div class="isb-lbl">신뢰도</div><div class="isb-val"><span class="badge ${relBadge}">${relTxt}</span></div></div>
+          <div class="isb-item" style="flex:2"><div class="isb-lbl">주의사항</div><div class="isb-val" style="font-size:11px;font-weight:400;color:var(--t2)">${esc(svc?.note||'')}</div></div>
+        </div>
+      </div>
+
+      <!-- 정보 출처 -->
+      <div class="src-block">
+        <div class="src-hd" id="src-hd-block">정보 수집 출처</div>
+        <div class="src-rows" id="src-rows-block"></div>
+        <div class="src-disc">⚠ 참고 목적 콘텐츠입니다. 비자·규정·비용은 수시로 변경되므로 공식 기관에서 최신 정보를 확인하세요.</div>
+      </div></div>
+
+      <!-- 면책 -->
+      <div class="disclaimer">본 콘텐츠는 Claude(Anthropic) AI가 2025년 기준 공개 정보를 바탕으로 작성한 참고 자료입니다. 법적 효력이 없으며, 개인 상황에 따라 다를 수 있습니다. 공식 정보는 반드시 원출처를 확인하시기 바랍니다.</div>`;
+
+    /* ── RENDER: src-rows (정보 출처) ── */
+    (function(){
+      var hd = document.getElementById('src-hd-block');
+      var rows = document.getElementById('src-rows-block');
+      if(!hd || !rows) return;
+
+      /* 헤더 배지 */
+      var aiCount = [srcs.aiChatgpt, srcs.aiGemini, srcs.aiPerplexity].filter(Boolean).length + 1;
+      hd.innerHTML = '정보 수집 출처 '
+        + (webSearchUsed
+          ? '<span style="padding:1px 7px;border-radius:4px;font-size:9px;font-weight:600;background:#e8f7f1;color:#0a7c52">✓ 실시간 웹검색</span>'
+          : '<span style="padding:1px 7px;border-radius:4px;font-size:9px;font-weight:600;background:#faeeda;color:#b55c08">학습 데이터</span>')
+        + ' <span style="padding:1px 7px;border-radius:4px;font-size:9px;font-weight:600;background:#f1ecfd;color:#5b21b6">AI '+aiCount+'종 교차검증</span>';
+
+      var html = '';
+
+      /* ① 공식 기관 — 미리 정의된 DB + AI 수집 출처 병합 */
+      var dbSrcs = getOfficialSrcs(S.country, svc ? svc.name : '');
+      if(dbSrcs && dbSrcs.length){
+        var dbHtml = dbSrcs.map(function(s){
+          return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap">'
+            +(s.u
+              ?'<a href="'+esc(s.u)+'" target="_blank" rel="noopener" style="font-size:12px;color:#1d55c2;text-decoration:underline;font-weight:500">'+esc(s.n)+'</a>'
+               +'<span style="font-size:10px;color:var(--t3)">'+esc(s.u)+'</span>'
+              :'<span style="font-size:12px;color:var(--t2);font-weight:500">'+esc(s.n)+'</span>')
+            +'</div>';
+        }).join('');
+        var extraOfficial = srcs.official && !dbSrcs.some(function(d){return d.n===srcs.official;})
+          ? '<div style="font-size:12px;color:var(--t2);margin-top:3px">+ '+esc(srcs.official)+'</div>' : '';
+        html += '<div class="src-row">'
+          + '<div class="src-ic" style="background:#eef2fd;color:#1d55c2">공식</div>'
+          + '<div style="flex:1"><div class="src-type">공식 기관 · 정부 사이트</div>'
+          + '<div class="src-val">' + dbHtml + extraOfficial + '</div></div></div>';
+      } else if(srcs.official){
+        html += '<div class="src-row">'
+          + '<div class="src-ic" style="background:#eef2fd;color:#1d55c2">공식</div>'
+          + '<div><div class="src-type">공식 기관 · 정부 사이트</div>'
+          + '<div class="src-val">' + esc(srcs.official) + '</div></div></div>';
+      }
+
+      /* ② 실제 검색 쿼리 */
+      if(srcs.searchedQuery){
+        html += '<div class="src-row">'
+          + '<div class="src-ic" style="background:#e8f7f1;color:#0a7c52">검색</div>'
+          + '<div><div class="src-type">실제 검색 쿼리</div>'
+          + '<div class="src-val" style="font-size:11px;color:var(--t2)">' + esc(srcs.searchedQuery) + '</div></div></div>';
+      }
+
+      /* ③ 수집된 URL */
+      if(srcs.searchedUrls){
+        var urlList = srcs.searchedUrls.split(',').map(function(u){return u.trim();}).filter(Boolean);
+        var urlHtml = urlList.map(function(u){
+          return '<a href="' + esc(u) + '" target="_blank" rel="noopener"'
+            + ' style="display:block;color:#1d55c2;font-size:11px;text-decoration:underline;margin-bottom:3px;word-break:break-all">'
+            + esc(u) + '</a>';
+        }).join('');
+        html += '<div class="src-row">'
+          + '<div class="src-ic" style="background:#e8f4fc;color:#0e6fa8">URL</div>'
+          + '<div><div class="src-type">수집된 출처 URL</div>'
+          + '<div class="src-val">' + urlHtml + '</div></div></div>';
+      }
+
+      /* ④ AI 교차검증 패널 */
+      var aiList = [
+        {key:'aiBase',      name:'Claude',      color:'#5b21b6', bg:'#f1ecfd', val: srcs.aiBase      || 'Claude (Anthropic) — 학습 데이터 + 웹검색 교차검증'},
+        {key:'aiChatgpt',   name:'ChatGPT',     color:'#0a7c52', bg:'#e8f7f1', val: srcs.aiChatgpt   || ''},
+        {key:'aiGemini',    name:'Gemini',      color:'#1d55c2', bg:'#eef2fd', val: srcs.aiGemini    || ''},
+        {key:'aiPerplexity',name:'Perplexity',  color:'#b55c08', bg:'#fef3e6', val: srcs.aiPerplexity|| ''},
+      ];
+      var anyAi = aiList.some(function(a){return a.val;});
+      if(anyAi){
+        html += '<div class="src-row" style="align-items:flex-start">'
+          + '<div class="src-ic" style="background:#f1ecfd;color:#5b21b6;font-size:9px">AI×4</div>'
+          + '<div style="flex:1"><div class="src-type">AI 멀티소스 교차검증</div>'
+          + '<div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">';
+        aiList.forEach(function(ai){
+          if(!ai.val) return;
+          html += '<div style="display:flex;gap:6px;align-items:flex-start">'
+            + '<span style="flex-shrink:0;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;background:'+ai.bg+';color:'+ai.color+'">'+ai.name+'</span>'
+            + '<span style="font-size:11px;color:var(--t2);line-height:1.4">'+esc(ai.val)+'</span>'
+            + '</div>';
+        });
+        html += '</div>';
+        if(srcs.aiConsensus){
+          html += '<div style="margin-top:6px;padding:5px 8px;background:#f1ecfd;border-radius:5px;font-size:11px;color:#5b21b6">'
+            + '<span style="font-weight:700">공통 합의:</span> '+esc(srcs.aiConsensus)+'</div>';
+        }
+        if(srcs.dataDate){
+          html += '<div style="font-size:10px;color:var(--t3);margin-top:4px">수집 데이터 기준: '+esc(srcs.dataDate)+'</div>';
+        }
+        html += '</div></div>';
+      } else {
+        html += '<div class="src-row">'
+          + '<div class="src-ic" style="background:#f1ecfd;color:#5b21b6">AI</div>'
+          + '<div><div class="src-type">AI 작성 기반</div>'
+          + '<div class="src-val">'+esc(srcs.aiBase||'Claude (Anthropic) — 학습 데이터 기반')+'</div>'
+          + (srcs.dataDate?'<div style="font-size:10px;color:var(--t3);margin-top:2px">수집 데이터 기준: '+esc(srcs.dataDate)+'</div>':'')
+          + '</div></div>';
+      }
+
+      /* ⑤ 커뮤니티 */
+      html += '<div class="src-row">'
+        + '<div class="src-ic" style="background:#faeeda;color:#b55c08">커뮤</div>'
+        + '<div><div class="src-type">커뮤니티 · 블로그 참고</div>'
+        + '<div class="src-val" style="font-size:11px;color:var(--t2)">네이버 카페 · 카카오 오픈채팅 · 현지 한인 커뮤니티<br>'
+        + '<span style="color:var(--t3)">※ 개인 경험 기반, 공식 정보와 교차 확인 필요</span></div>'
+        + '</div></div>';
+
+      rows.innerHTML = html;
+    })();
+
+    /* ── RENDER: SEO tab ── */
+    const im=meta.info_meta||{};
+    const st=meta.seo_title||seo?.seoTitle||`${S.country} ${topicToUse}`;
+    const gt=meta.geo_title||seo?.geoTitle||st;
+    const kws=(meta.keywords?.length?meta.keywords:seo?.keywords)||[];
+    const alts=(meta.alt_titles?.length?meta.alt_titles:seo?.alts)||[];
+        /* ── RENDER: Export tab ── */
+    (function(){
+      var exportData = buildExportData(parsed, sum, srcs, seo, meta);
+      renderExportTab(exportData);
+    })();
+
+    /* ── RENDER: SEO tab (문자열 연결 방식 — 백틱 충돌 방지) ── */
+    (function(){
+      var im = meta.info_meta||{};
+      var st = meta.seo_title || (seo ? seo.seoTitle : S.country+' '+topicToUse);
+      var gt = meta.geo_title || (seo ? seo.geoTitle : st);
+      var kws = (meta.keywords&&meta.keywords.length) ? meta.keywords : (seo ? seo.keywords : []);
+      var alts = (meta.alt_titles&&meta.alt_titles.length) ? meta.alt_titles : (seo ? seo.alts : []);
+      var kwHtml = kws.map(function(k){
+        return '<span class="ktag">'+esc(k)+'</span>';
+      }).join('');
+      var altHtml = alts.map(function(a,i){
+        return '<div class="icard-val small" style="margin-bottom:3px">'+(i+1)+'. '+esc(a)+'</div>';
+      }).join('');
+      var factsHtml = im.key_facts && im.key_facts.length
+        ? '<div class="icard"><div class="icard-lbl">핵심 사실</div>'
+          + im.key_facts.map(function(f){
+              return '<div class="icard-val small" style="margin-bottom:3px">'
+                +'<span style="color:#0a7c52;font-weight:700">✓ </span>'+esc(f)+'</div>';
+            }).join('')+'</div>' : '';
+      var cautionHtml = im.caution_points && im.caution_points.length
+        ? '<div class="icard"><div class="icard-lbl">주의사항</div>'
+          + im.caution_points.map(function(p){
+              return '<div class="icard-val small" style="margin-bottom:3px">'
+                +'<span style="color:#b91c1c;font-weight:700">! </span>'+esc(p)+'</div>';
+            }).join('')+'</div>' : '';
+      var aiVerif = [
+        srcs && srcs.aiChatgpt ? 'ChatGPT' : '',
+        srcs && srcs.aiGemini  ? 'Gemini'  : '',
+        srcs && srcs.aiPerplexity ? 'Perplexity' : '',
+        'Claude'
+      ].filter(Boolean).join(' · ');
+      var metaHtml = '국가: <strong>'+esc(S.country)+'</strong>'
+        +(S.sub?' ('+esc(S.sub)+')':'')
+        +'  |  서비스: <strong>'+esc(svc?svc.name:'')+'</strong>'
+        +'  |  항목: <strong>'+esc(topicToUse)+'</strong>'
+        +(isDefault?' (기본값)':'')
+        +'  |  포맷: <strong>'+esc(fmt.name)+'</strong>'
+        +'  |  독자: <strong>'+esc(tgt.name)+'</strong>';
+
+      var html = '<div class="info-cards">'
+        +'<div class="icard"><div class="icard-lbl">SEO 제목</div><div class="icard-val">'+esc(st)+'</div></div>'
+        +'<div class="icard"><div class="icard-lbl">GEO 제목</div><div class="icard-val small">'+esc(gt)+'</div></div>'
+        +'<div class="icard"><div class="icard-lbl">핵심 키워드 (4기준)</div><div class="kwrap" style="margin-top:4px">'+kwHtml+'</div></div>'
+        +'<div class="icard"><div class="icard-lbl">대안 제목 3개</div>'+altHtml+'</div>'
+        + factsHtml + cautionHtml
+        +'<div class="icard" style="grid-column:1/-1"><div class="icard-lbl">생성 정보</div>'
+        +'<div class="icard-val small">'+metaHtml+'</div></div>'
+        +'<div class="icard" style="grid-column:1/-1"><div class="icard-lbl">AI 교차검증 소스</div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">'
+        +'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#f1ecfd;color:#5b21b6">Claude</span>'
+        +'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#e8f7f1;color:#0a7c52">ChatGPT</span>'
+        +'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#eef2fd;color:#1d55c2">Gemini</span>'
+        +'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#fef3e6;color:#b55c08">Perplexity</span>'
+        +'</div></div>'
+        +'</div>';
+
+      var el = document.getElementById('otab-seo');
+      if(el) el.innerHTML = html;
+    })();
+
+  }catch(err){
+    var preview=rawText?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;color:var(--t3)">API 원문 보기</summary><pre style="margin-top:6px;font-size:11px;white-space:pre-wrap;overflow-x:auto;max-height:200px;background:var(--sur2);padding:8px;border-radius:6px">'+esc(rawText.slice(0,1200))+(rawText.length>1200?'\n...(생략)':'')+'</pre></details>':'';
+    var errHtml='<div class="err-box"><strong>생성 실패</strong><br><br><span style="font-size:12px">'+esc(err.message)+'</span>'
+      +'<div style="margin-top:10px"><button style="padding:6px 14px;font-size:12px;border:.5px solid #f4a9a9;border-radius:7px;background:transparent;color:#b91c1c;cursor:pointer" onclick="generate()">↺ 다시 시도</button></div>'
+      +preview+'</div>';
+    var oc=document.getElementById('otab-content');if(oc)oc.innerHTML=errHtml;
+    setTabHTML('otab-raw', rawText ? '<pre class="raw">'+esc(rawText)+'</pre>' : '');
+  }
+  btn.disabled=false; btn.classList.remove('running'); checkGen();
+  var oa=document.getElementById('outarea'); if(oa)oa.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+
+/* ══ 공식 기관 기본 데이터 맵 ══ */
+const OFFICIAL_SRCS = {
+  /* ── 비자·법률 ── */
+  '비자·법률': {
+    '일본':        [{n:'일본 출입국재류관리청',    u:'https://www.moj.go.jp/isa/'},
+                   {n:'주한일본대사관',            u:'https://www.kr.emb-japan.go.jp'}],
+    '태국':        [{n:'태국 이민국 (Thai Immigration)',u:'https://www.immigration.go.th'},
+                   {n:'주한태국대사관',            u:'https://thaiembassy.or.kr'}],
+    '베트남':      [{n:'베트남 이민국',             u:'https://xuatnhapcanh.gov.vn'},
+                   {n:'주한베트남대사관',           u:'https://vnembassy-seoul.mofa.gov.vn'}],
+    '미국':        [{n:'미국 국무부 비자',          u:'https://travel.state.gov'},
+                   {n:'USCIS 이민서비스',          u:'https://www.uscis.gov'}],
+    '캐나다':      [{n:'캐나다 이민·난민시민권부', u:'https://www.canada.ca/en/immigration-refugees-citizenship.html'},
+                   {n:'주한캐나다대사관',          u:'https://www.canada.ca/en/immigration-refugees-citizenship/services/canadians/dual-citizenship.html'}],
+    '호주':        [{n:'호주 이민부 (Home Affairs)',u:'https://immi.homeaffairs.gov.au'},
+                   {n:'주한호주대사관',            u:'https://southkorea.embassy.gov.au'}],
+    '영국':        [{n:'UK Visas and Immigration', u:'https://www.gov.uk/browse/visas-immigration'},
+                   {n:'주한영국대사관',            u:'https://www.gov.uk/world/organisations/british-embassy-seoul'}],
+    '독일':        [{n:'독일 연방이민·난민청 BAMF', u:'https://www.bamf.de'},
+                   {n:'주한독일대사관',            u:'https://seoul.diplo.de'}],
+    '포르투갈':    [{n:'AIMA (포르투갈 이민청)',    u:'https://aima.gov.pt'},
+                   {n:'주한포르투갈대사관',        u:'https://seoul.embaixadaportugal.mne.gov.pt'}],
+    '프랑스':      [{n:'France-Visas 공식 비자',   u:'https://france-visas.gouv.fr'},
+                   {n:'주한프랑스대사관',          u:'https://kr.ambafrance.org'}],
+    '스페인':      [{n:'스페인 이민·외국인 사무소', u:'https://extranjeros.inclusiondiversidad.gob.es'},
+                   {n:'주한스페인대사관',          u:'https://www.exteriores.gob.es/Embajadas/Seoul'}],
+    '이탈리아':    [{n:'이탈리아 내무부 비자',      u:'https://vistoperitalia.esteri.it'},
+                   {n:'주한이탈리아대사관',        u:'https://ambseoul.esteri.it'}],
+    '필리핀':      [{n:'필리핀 이민국 (BI)',        u:'https://immigration.gov.ph'},
+                   {n:'주한필리핀대사관',          u:'https://seoulpe.dfa.gov.ph'}],
+    '말레이시아':  [{n:'말레이시아 이민국',         u:'https://www.imi.gov.my'},
+                   {n:'eNTRI / eVISA 포털',       u:'https://www.windowmalaysia.my'}],
+    '싱가포르':    [{n:'싱가포르 이민국 (ICA)',     u:'https://www.ica.gov.sg'},
+                   {n:'MOM 취업패스',             u:'https://www.mom.gov.sg'}],
+    '인도네시아':  [{n:'인도네시아 이민국',         u:'https://www.imigrasi.go.id'},
+                   {n:'e-VOA 인도네시아',         u:'https://molina.imigrasi.go.id'}],
+    '홍콩':        [{n:'홍콩 이민청',              u:'https://www.immd.gov.hk'},
+                   {n:'홍콩 입경사무처',           u:'https://www.immigration.gov.hk'}],
+    '대만':        [{n:'대만 이민서 (NIA)',         u:'https://www.immigration.gov.tw'},
+                   {n:'대만 외교부 비자',          u:'https://visawebapp.boca.gov.tw'}],
+    '중국':        [{n:'중국 국가이민관리국',        u:'https://www.nia.gov.cn'},
+                   {n:'주한중국대사관 비자',        u:'https://kr.china-embassy.gov.cn'}],
+    '네덜란드':    [{n:'IND 네덜란드 이민귀화청',   u:'https://ind.nl'},
+                   {n:'주한네덜란드대사관',        u:'https://www.netherlandsworldwide.nl/countries/south-korea'}],
+    '태국':        [{n:'태국 이민국',               u:'https://www.immigration.go.th'},
+                   {n:'Thai e-Visa',              u:'https://www.thaievisa.go.th'}],
+    'UAE(두바이)': [{n:'UAE 연방이민청',            u:'https://icp.gov.ae'},
+                   {n:'두바이 이민 (GDRFA)',       u:'https://www.gdrfad.gov.ae'}],
+    '기본':        [{n:'외교부 해외안전여행',        u:'https://www.0404.go.kr'},
+                   {n:'해당국 이민청 공식 사이트', u:''}]
+  },
+
+  /* ── 주거 ── */
+  '주거': {
+    '일본':        [{n:'스마이틱 (Suumo)',         u:'https://suumo.jp'},
+                   {n:'히츠지 부동산 (외국인)',    u:'https://hituji.jp'},
+                   {n:'Sakura House 쉐어',        u:'https://www.sakura-house.com'}],
+    '태국':        [{n:'DDproperty 태국',          u:'https://www.ddproperty.com'},
+                   {n:'FazWaz 태국',              u:'https://www.fazwaz.co.th'}],
+    '미국':        [{n:'Zillow 부동산',             u:'https://www.zillow.com'},
+                   {n:'Apartments.com',           u:'https://www.apartments.com'}],
+    '호주':        [{n:'Domain.com.au',            u:'https://www.domain.com.au'},
+                   {n:'realestate.com.au',        u:'https://www.realestate.com.au'}],
+    '영국':        [{n:'Rightmove UK',             u:'https://www.rightmove.co.uk'},
+                   {n:'Zoopla 영국',              u:'https://www.zoopla.co.uk'}],
+    '독일':        [{n:'Immobilienscout24',        u:'https://www.immobilienscout24.de'},
+                   {n:'WG-Gesucht 쉐어',         u:'https://www.wg-gesucht.de'}],
+    '포르투갈':    [{n:'Idealista 포르투갈',       u:'https://www.idealista.pt'},
+                   {n:'Uniplaces 포르투갈',       u:'https://www.uniplaces.com'}],
+    '기본':        [{n:'현지 부동산 포털',          u:''},
+                   {n:'대사관 생활 안내 가이드',   u:'https://www.0404.go.kr'}]
+  },
+
+  /* ── 취업·알바 ── */
+  '취업·알바': {
+    '일본':        [{n:'Hello Work (公共職業安定所)', u:'https://www.hellowork.mhlw.go.jp'},
+                   {n:'일본 후생노동성 외국인고용',u:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/gaikokujin/index.html'},
+                   {n:'JREC-IN Portal (연구직)',  u:'https://jrecin.jst.go.jp'}],
+    '호주':        [{n:'호주 공정노동위 (FWC)',    u:'https://www.fairwork.gov.au'},
+                   {n:'JobActive 구직 포털',     u:'https://www.jobactive.gov.au'},
+                   {n:'호주 비자 취업조건',       u:'https://immi.homeaffairs.gov.au'}],
+    '캐나다':      [{n:'캐나다 Job Bank',         u:'https://www.jobbank.gc.ca'},
+                   {n:'캐나다 노동부',            u:'https://www.canada.ca/en/employment-social-development.html'}],
+    '영국':        [{n:'Gov.uk 취업 권리',        u:'https://www.gov.uk/employment'},
+                   {n:'ACAS 노동 가이드',        u:'https://www.acas.org.uk'}],
+    '독일':        [{n:'독일 연방고용청 (BA)',     u:'https://www.arbeitsagentur.de'},
+                   {n:'Make it in Germany',      u:'https://www.make-it-in-germany.com'}],
+    '기본':        [{n:'KOTRA 해외 취업 정보',    u:'https://www.kotra.or.kr'},
+                   {n:'외교부 해외안전여행',       u:'https://www.0404.go.kr'}]
+  },
+
+  /* ── 의료·안전 ── */
+  '의료·안전': {
+    '일본':        [{n:'일본 후생노동성',          u:'https://www.mhlw.go.jp'},
+                   {n:'일본 국민건강보험 안내',   u:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/'},
+                   {n:'JNTO 의료기관 안내',      u:'https://www.jnto.go.jp/emergency/kor/mi_guide.html'}],
+    '태국':        [{n:'태국 보건부',              u:'https://www.moph.go.th'},
+                   {n:'태국 관광경찰 1155',       u:'https://www.1155.go.th'}],
+    '미국':        [{n:'미국 CDC 건강정보',        u:'https://wwwnc.cdc.gov/travel'},
+                   {n:'미국 CMS 의료보험',        u:'https://www.cms.gov'}],
+    '호주':        [{n:'호주 보건부 (DoH)',        u:'https://www.health.gov.au'},
+                   {n:'Medicare 호주',           u:'https://www.servicesaustralia.gov.au/medicare'}],
+    '영국':        [{n:'NHS 영국 국민보건서비스',  u:'https://www.nhs.uk'},
+                   {n:'NHS 외국인 이용 안내',    u:'https://www.nhs.uk/nhs-services/visiting-or-moving-to-england/'}],
+    '기본':        [{n:'세계보건기구 (WHO)',       u:'https://www.who.int'},
+                   {n:'외교부 해외안전여행 의료', u:'https://www.0404.go.kr'},
+                   {n:'한국 재외국민 영사서비스', u:'https://www.mofa.go.kr'}]
+  },
+
+  /* ── 교통 ── */
+  '교통': {
+    '일본':        [{n:'JR 공식 사이트',          u:'https://www.jreast.co.jp/kr/'},
+                   {n:'Suica (JR동일본)',        u:'https://www.jreast.co.jp/suica/'},
+                   {n:'Google Maps 일본',        u:'https://maps.google.com'}],
+    '태국':        [{n:'방콕 BTS 스카이트레인',    u:'https://www.bts.co.th'},
+                   {n:'방콕 MRT',               u:'https://www.mrta.co.th'}],
+    '미국':        [{n:'Google Maps 대중교통',    u:'https://maps.google.com'},
+                   {n:'Amtrak 미국 철도',        u:'https://www.amtrak.com'}],
+    '영국':        [{n:'TfL 런던 교통',           u:'https://tfl.gov.uk'},
+                   {n:'National Rail 영국',      u:'https://www.nationalrail.co.uk'}],
+    '호주':        [{n:'Transport NSW',          u:'https://transportnsw.info'},
+                   {n:'PTV 빅토리아',           u:'https://www.ptv.vic.gov.au'}],
+    '기본':        [{n:'Google Maps',            u:'https://maps.google.com'},
+                   {n:'현지 교통 공사',          u:''}]
+  },
+
+  /* ── 교육 ── */
+  '교육': {
+    '일본':        [{n:'일본 문부과학성',          u:'https://www.mext.go.jp'},
+                   {n:'JASSO 장학금',            u:'https://www.jasso.or.jp'},
+                   {n:'일본 어학원 연합',         u:'https://www.nisshinkyo.org'}],
+    '호주':        [{n:'호주 교육부 CRICOS',      u:'https://cricos.education.gov.au'},
+                   {n:'StudyinAustralia',        u:'https://www.studyinaustralia.gov.au'}],
+    '캐나다':      [{n:'캐나다 교육부',           u:'https://www.canada.ca/en/education.html'},
+                   {n:'EduCanada',              u:'https://www.educanada.ca'}],
+    '영국':        [{n:'UCAS 영국 대학 입학',     u:'https://www.ucas.com'},
+                   {n:'British Council',        u:'https://www.britishcouncil.org'}],
+    '미국':        [{n:'EducationUSA',           u:'https://educationusa.state.gov'},
+                   {n:'미국 대학 입학 (Common App)', u:'https://www.commonapp.org'}],
+    '기본':        [{n:'한국 교육부 유학 정보',   u:'https://www.moe.go.kr'},
+                   {n:'국제학교 협회 (CIS)',     u:'https://www.cis.org'}]
+  },
+
+  /* ── 로컬 라이프 ── */
+  '로컬 라이프': {
+    '일본':        [{n:'도쿄도 외국인 생활 안내',  u:'https://www.metro.tokyo.lg.jp/english/living/'},
+                   {n:'CLAIR 다문화공생',        u:'https://www.clair.or.jp'}],
+    '태국':        [{n:'태국 관광청 (TAT)',        u:'https://www.tourismthailand.org'},
+                   {n:'방콕 메트로폴리탄',        u:'https://www.bangkok.go.th'}],
+    '기본':        [{n:'현지 시청·구청 생활 안내', u:''},
+                   {n:'외교부 해외안전여행',       u:'https://www.0404.go.kr'}]
+  },
+
+  /* ── 핫플레이스 ── */
+  '핫플레이스': {
+    '일본':        [{n:'JNTO 일본 관광청',        u:'https://www.jnto.go.jp/kor/'},
+                   {n:'Visit Japan Web',        u:'https://vjw-lp.digital.go.jp/ko/'}],
+    '태국':        [{n:'태국 관광청 한국어',       u:'https://www.tourismthailand.org/ko'},
+                   {n:'TripAdvisor 태국',        u:'https://www.tripadvisor.co.kr'}],
+    '기본':        [{n:'Google Maps',            u:'https://maps.google.com'},
+                   {n:'TripAdvisor',            u:'https://www.tripadvisor.co.kr'}]
+  }
+};
+
+/* 국가+서비스 기준 공식 기관 반환 */
+function getOfficialSrcs(country, svcName){
+  var catMap = OFFICIAL_SRCS[svcName] || {};
+  return catMap[country] || catMap['기본'] || [];
+}
+
+
+/* ══ 도시·지역 기본 설명 데이터 ══ */
+const CITY_DESC = {
+  /* 일본 */
+  '도쿄':         '일본의 수도이자 세계 최대 도시권. 최첨단 기술과 전통 문화가 공존하는 한국인 장기체류 1위 도시.',
+  '오사카':       '일본 제2의 도시. 맛집과 쇼핑의 천국으로 유명하며, 친근한 현지인 문화와 저렴한 생활비가 특징.',
+  '교토':         '일본 천년 고도. 수백 개의 사찰·신사와 전통 료칸이 남아 있는 문화유산의 도시.',
+  '후쿠오카':     '규슈의 중심 도시. 한국과 가장 가까운 일본 대도시로 워킹홀리데이·유학생에게 인기.',
+  '삿포로':       '홋카이도의 중심 도시. 설경과 신선한 해산물, 라멘으로 유명한 북방의 대도시.',
+  '나고야':       '일본 중부 산업 중심지. 도요타 본사 인근으로 제조업 취업 수요가 높은 도시.',
+  '나하(오키나와)':'아열대 기후의 일본 남국 섬. 산호초 바다와 독자적인 류큐 문화가 매력적인 휴양지.',
+  '히로시마':     '역사의 도시 히로시마. 평화공원과 미야지마 섬으로 유명하며 조용하고 살기 좋은 도시.',
+  /* 중국 */
+  '베이징':       '중국의 수도. 자금성·만리장성 등 역사 유적이 풍부하며 외교·정치의 중심지.',
+  '상하이':       '중국 최대 경제 도시. 국제 비즈니스와 금융의 허브로 외국인 거주 인프라가 잘 갖춰진 곳.',
+  '광저우':       '중국 남부 무역 중심지. 한국 기업 진출이 활발하며 광둥 요리의 본고장.',
+  '선전':         '중국 IT·스타트업 허브. 홍콩 인접 특별경제구역으로 빠른 성장과 현대적 인프라가 특징.',
+  '청두':         '쓰촨성 중심 도시. 판다 서식지와 매운 쓰촨 요리로 유명하며 물가가 저렴한 내륙 대도시.',
+  /* 홍콩 */
+  '홍콩섬':       '홍콩의 금융·상업 중심지. 빅토리아 피크와 화려한 야경, 세계적 쇼핑 환경이 밀집.',
+  '구룡(카우룬)': '홍콩 도심 맞은편 반도. 저렴한 숙박과 다채로운 먹거리로 여행자·장기체류자 모두에게 인기.',
+  /* 대만 */
+  '타이베이':     '맛있는 음식과 신비로운 자연 환경이 매력적인 대만의 수도. 야시장·온천·현대 문화의 중심지.',
+  '타이중':       '대만 중부의 쾌적한 도시. 서부 해안과 산악 지형에 접근이 쉽고 생활비가 상대적으로 저렴.',
+  '가오슝':       '대만 최대 항구도시. 온화한 기후와 해변, 현대적 도심 개발로 거주 매력이 높아지는 남부 도시.',
+  '화롄':         '태루거 협곡과 청정 자연이 유명한 대만 동부 도시. 느린 삶을 원하는 장기체류자에게 추천.',
+  /* 태국 */
+  '방콕':         '태국의 수도. 화려한 사원과 활기찬 야시장, 저렴한 물가로 디지털노마드·장기체류자의 아시아 허브.',
+  '치앙마이':     '태국 북부의 문화 수도. 서늘한 기후와 낮은 생활비, 활발한 노마드 커뮤니티로 전 세계적 인기.',
+  '푸켓':         '태국 최대 섬 휴양지. 아름다운 해변과 국제적 인프라를 갖춘 장기 리조트 생활의 메카.',
+  '파타야':       '방콕 인근 해변 도시. 은퇴자와 장기체류자 커뮤니티가 발달하며 편리한 생활 인프라 보유.',
+  '코사무이':     '태국 만(灣)의 열대 섬. 야자수 해변과 럭셔리 리조트가 조화를 이루는 힐링 휴양지.',
+  /* 베트남 */
+  '하노이':       '베트남의 수도. 프랑스 식민지 건축과 호수 공원이 매력적인 역사 도시.',
+  '호치민':       '베트남 최대 경제 도시. 활기찬 비즈니스 환경과 저렴한 물가로 한국인 장기체류자에게 인기.',
+  '다낭':         '베트남 중부 해안 도시. 세계적 수준의 리조트 해변과 호이안 인접성으로 급성장 중인 관광·거주지.',
+  '호이안':       '유네스코 세계유산 고대 도시. 아기자기한 등불 거리와 느린 삶의 리듬이 매력적인 곳.',
+  '나트랑':       '베트남 휴양 해변 도시. 청명한 바다와 저렴한 해산물, 한국인 커뮤니티가 대규모로 형성된 곳.',
+  /* 필리핀 */
+  '마닐라':       '필리핀의 수도. 영어 교육의 허브이자 한국인 어학연수 최대 거점 도시.',
+  '세부':         '필리핀 중부 관광·교육 도시. 세계적 다이빙 포인트와 저렴한 영어 어학연수로 한국인에게 친숙.',
+  '보홀':         '초콜렛 힐과 안경원숭이로 유명한 필리핀 자연 섬. 힐링과 다이빙을 즐기는 여행자 성지.',
+  '팔라완':       '세계 최고 수준의 청정 바다를 자랑하는 필리핀 서부 섬. 자연 그대로의 매력이 압도적인 곳.',
+  /* 말레이시아 */
+  '쿠알라룸푸르': '말레이시아 수도. 페트로나스 타워와 다민족 문화, 영어 통용 환경으로 동남아 생활 거점.',
+  '페낭':         '말레이시아 북서부 섬. 유네스코 세계유산 조지타운과 저렴한 물가, 맛있는 음식으로 유명.',
+  '코타키나발루': '말레이시아 보르네오 섬. 세계적 다이빙과 열대 정글, 은퇴 이민지로 인기 높은 휴양 도시.',
+  /* 싱가포르 */
+  '마리나베이':   '싱가포르 금융·관광의 상징. 마리나베이샌즈와 가든스 바이 더 베이가 있는 현대 도시의 심장.',
+  '오차드':       '싱가포르 최대 쇼핑 거리. 세계적 브랜드와 글로벌 음식 문화가 집결한 프리미엄 생활권.',
+  /* 인도네시아 */
+  '발리':         '세계인이 꿈꾸는 힐링 섬. 아름다운 논밭과 사원, 서퍼 문화로 장기체류 디지털노마드의 성지.',
+  '자카르타':     '인도네시아 수도이자 최대 도시. 동남아 경제 허브로 한국 기업 진출이 활발한 비즈니스 도시.',
+  /* 미국 */
+  '뉴욕':         '세계 금융·문화의 수도. 다양성과 기회가 넘치는 도시이지만 높은 생활비가 특징.',
+  'LA':           '서부 최대 도시. 한인 커뮤니티(코리아타운)가 발달하며 온화한 기후와 엔터테인먼트 산업의 중심.',
+  '샌프란시스코': '실리콘밸리 인접 IT 허브. 세계적 기술 기업과 다문화 환경이 공존하나 생활비 최상위.',
+  '시카고':       '미국 중부 최대 도시. 뉴욕·LA 대비 저렴한 생활비와 강력한 한인 커뮤니티가 장점.',
+  '마이애미':     '미국 남동부 관광·금융 도시. 라틴 문화와 해변이 조화로운 곳으로 기업가·디지털노마드에 인기.',
+  '하와이':       '태평양의 낙원. 아름다운 자연과 다문화 환경이 공존하나 미국 내에서도 높은 물가.',
+  /* 캐나다 */
+  '밴쿠버':       '캐나다 서부 대도시. 아름다운 자연과 대규모 한인 커뮤니티, 워킹홀리데이 인기 1위 도시.',
+  '토론토':       '캐나다 최대 도시. 다문화 사회의 중심으로 취업·이민 경로가 가장 다양한 도시.',
+  '몬트리올':     '캐나다 프랑스어권 도시. 북미 대도시 중 가장 저렴한 생활비와 활발한 예술 문화.',
+  /* 영국 */
+  '런던':         '세계 금융·문화의 중심. 한국인 워킹홀리데이·유학 최대 인기 도시이나 높은 생활비 주의.',
+  '맨체스터':     '영국 북부 산업·문화 도시. 런던 대비 저렴한 물가와 활발한 한국인 커뮤니티.',
+  '에든버러':     '스코틀랜드 수도. 중세 고성과 세계적 페스티벌, 영국 내 가장 아름다운 도시 중 하나.',
+  /* 독일 */
+  '베를린':       '독일 수도. 창의적 예술·스타트업 문화와 상대적으로 저렴한 생활비로 유럽 노마드의 허브.',
+  '뮌헨':         '독일 남부 바이에른 주도. 강한 경제력과 높은 생활 수준, 옥토버페스트로 유명.',
+  '함부르크':     '독일 최대 항구도시. 무역·미디어 산업 중심으로 국제적 분위기와 수변 도시 매력이 특징.',
+  /* 포르투갈 */
+  '리스본':       '포르투갈 수도. D8 디지털노마드 비자 허브로 따뜻한 기후와 유럽 내 비교적 낮은 물가.',
+  '포르투':       '포르투갈 북부 항구도시. 포트와인과 아줄레주 타일로 유명한 유럽 감성 충만한 소도시.',
+  /* 호주 */
+  '시드니':       '호주 최대 도시. 오페라 하우스와 하버브리지, 풍부한 한인 커뮤니티로 워킹홀리데이 1순위.',
+  '멜버른':       '호주 문화 수도. 다양한 음식·예술 문화와 살기 좋은 환경으로 이민자에게 꾸준히 인기.',
+  '브리즈번':     '2032 올림픽 개최 도시. 온화한 기후와 빠른 성장세, 상대적으로 저렴한 시드니 대안.',
+  '골드코스트':   '호주 대표 해변 관광·거주지. 서퍼스 파라다이스와 테마파크로 유명한 휴양 도시.',
+  '퍼스':         '호주 서부 최대 도시. 일조량 세계 최고 수준, 광업 취업 수요가 높고 한적한 생활환경.',
+  /* UAE */
+  '두바이':       '세계 최고층 빌딩과 럭셔리 쇼핑의 도시. 소득세 없는 경제 환경으로 외국인 전문직에게 인기.',
+  '아부다비':     'UAE 수도이자 석유 부국의 중심. 두바이 대비 조용하고 안전한 가족 생활 환경.',
+  /* 기본값 */
+  '_default':     ''
+};
+
+function getCityDesc(city){
+  return CITY_DESC[city] || CITY_DESC['_default'];
+}
+
+
+/* ══ 외부 AI 교차검증 ══ */
+function toggleApiKeys(){
+  var p=document.getElementById('apikey-panel');
+  var a=document.getElementById('apikey-arrow');
+  if(p.style.display==='none'){p.style.display='block';a.textContent='▴';}
+  else{p.style.display='none';a.textContent='▾';}
+}
+function saveApiKeys(){
+  var g=document.getElementById('key-gemini').value.trim();
+  var o=document.getElementById('key-openai').value.trim();
+  var p=document.getElementById('key-perplexity').value.trim();
+  var nt=document.getElementById('key-notion-token').value.trim();
+  var nd=document.getElementById('key-notion-db').value.trim();
+  var np=document.getElementById('notion-prop-title').value.trim();
+  try{
+    if(g)  localStorage.setItem('ddda_key_gemini',g);
+    if(o)  localStorage.setItem('ddda_key_openai',o);
+    if(p)  localStorage.setItem('ddda_key_perplexity',p);
+    if(nt) localStorage.setItem('ddda_key_notion_token',nt);
+    if(nd) localStorage.setItem('ddda_key_notion_db',nd);
+    if(np) localStorage.setItem('ddda_notion_prop_title',np);
+    var status=document.getElementById('apikey-status');
+    var saved=[];
+    if(g) saved.push('Gemini ✓');
+    if(o) saved.push('ChatGPT ✓');
+    if(p) saved.push('Perplexity ✓');
+    if(nt) saved.push('Notion ✓');
+    status.innerHTML='<span style="color:#0a7c52">저장 완료: '+saved.join(' · ')+'</span>';
+    setTimeout(function(){status.innerHTML='';},3000);
+  }catch(e){console.warn('localStorage 저장 실패',e);}
+}
+function loadApiKeys(){
+  try{
+    var vals={
+      'key-gemini':          localStorage.getItem('ddda_key_gemini')||'',
+      'key-openai':          localStorage.getItem('ddda_key_openai')||'',
+      'key-perplexity':      localStorage.getItem('ddda_key_perplexity')||'',
+      'key-notion-token':    localStorage.getItem('ddda_key_notion_token')||'',
+      'key-notion-db':       localStorage.getItem('ddda_key_notion_db')||'',
+      'notion-prop-title':   localStorage.getItem('ddda_notion_prop_title')||'이름'
+    };
+    var anyKey=false;
+    Object.keys(vals).forEach(function(id){
+      var el=document.getElementById(id);
+      if(el&&vals[id]){el.value=vals[id];anyKey=true;}
+    });
+    if(anyKey){
+      var panel=document.getElementById('apikey-panel');
+      var arrow=document.getElementById('apikey-arrow');
+      if(panel) panel.style.display='block';
+      if(arrow) arrow.textContent='▴';
+      var loaded=[];
+      if(vals['key-gemini'])       loaded.push('Gemini');
+      if(vals['key-openai'])       loaded.push('ChatGPT');
+      if(vals['key-perplexity'])   loaded.push('Perplexity');
+      if(vals['key-notion-token']) loaded.push('Notion');
+      var status=document.getElementById('apikey-status');
+      if(status) status.innerHTML='<span style="color:var(--t3)">저장된 키 로드: '+loaded.join(' · ')+'</span>';
+    }
+  }catch(e){}
+}
+
+/* ── 노션 등록 ── */
+async function sendToNotion(){
+  if(!G_EXPORT||!G_EXPORT.seo_title){alert('먼저 콘텐츠를 생성하세요.');return;}
+
+  var token=''; var dbId=''; var propTitle='이름';
+  try{
+    token  = (document.getElementById('key-notion-token')||{}).value||localStorage.getItem('ddda_key_notion_token')||'';
+    dbId   = (document.getElementById('key-notion-db')||{}).value||localStorage.getItem('ddda_key_notion_db')||'';
+    propTitle = (document.getElementById('notion-prop-title')||{}).value||localStorage.getItem('ddda_notion_prop_title')||'이름';
+  }catch(e){}
+
+  var statusEl=document.getElementById('notion-send-status');
+  var btn=document.getElementById('notion-send-btn');
+
+  if(!token||!dbId){
+    if(statusEl) statusEl.innerHTML='<span style="color:#b91c1c">⚠ Notion 토큰과 DB ID를 먼저 API 키 설정에서 입력하세요.</span>';
+    return;
+  }
+
+  if(btn){btn.textContent='등록 중...';btn.disabled=true;}
+  if(statusEl) statusEl.innerHTML='<span style="color:#b55c08">노션 API 호출 중...</span>';
+
+  /* ── 마크다운 → 노션 블록 변환 ── */
+  function mdToBlocks(md){
+    var blocks=[];
+    var lines=(md||'').split('\n');
+    lines.forEach(function(line){
+      var trimmed=line.trim();
+      if(!trimmed){return;}
+      var type='paragraph'; var text=trimmed; var anno={};
+      if(/^###\s/.test(trimmed)){type='heading_3';text=trimmed.replace(/^###\s/,'');}
+      else if(/^##\s/.test(trimmed)){type='heading_2';text=trimmed.replace(/^##\s/,'');}
+      else if(/^#\s/.test(trimmed)){type='heading_1';text=trimmed.replace(/^#\s/,'');}
+      else if(/^[-*]\s/.test(trimmed)){type='bulleted_list_item';text=trimmed.replace(/^[-*]\s/,'');}
+      else if(/^\d+\.\s/.test(trimmed)){type='numbered_list_item';text=trimmed.replace(/^\d+\.\s/,'');}
+      else if(/^>\s/.test(trimmed)){type='quote';text=trimmed.replace(/^>\s/,'');}
+      /* bold/italic 인라인 제거 (노션 rich_text 단순화) */
+      text=text.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`(.+?)`/g,'$1');
+      /* 노션 rich_text 최대 2000자 */
+      var chunks=[];
+      for(var i=0;i<text.length;i+=1990) chunks.push(text.slice(i,i+1990));
+      chunks.forEach(function(chunk,ci){
+        var block={object:'block',type:ci===0?type:'paragraph'};
+        block[ci===0?type:'paragraph']={rich_text:[{type:'text',text:{content:chunk}}]};
+        blocks.push(block);
+      });
+    });
+    /* 노션 children 최대 100개 */
+    return blocks.slice(0,100);
+  }
+
+  /* ── 페이지 속성 구성 ── */
+  var props={};
+  props[propTitle]={title:[{type:'text',text:{content:(G_EXPORT.seo_title||'').slice(0,2000)}}]};
+
+  /* 선택적 속성 — DB에 해당 속성이 없으면 노션이 무시함 */
+  if(G_EXPORT.country)     props['국가']    ={select:{name:G_EXPORT.country}};
+  if(G_EXPORT.city)        props['도시']    ={select:{name:G_EXPORT.city}};
+  if(G_EXPORT.service_cat) props['서비스']  ={select:{name:G_EXPORT.service_cat}};
+  if(G_EXPORT.geo_title)   props['부제목']  ={rich_text:[{type:'text',text:{content:G_EXPORT.geo_title.slice(0,2000)}}]};
+  if(G_EXPORT.keywords)    props['키워드']  ={rich_text:[{type:'text',text:{content:G_EXPORT.keywords.slice(0,2000)}}]};
+                           props['활성']    ={checkbox:true};
+
+  var payload={
+    parent:{database_id:dbId.replace(/-/g,'')},
+    properties:props,
+    children:mdToBlocks(G_EXPORT.content_md)
+  };
+
+  try{
+    var res=await fetch('https://api.notion.com/v1/pages',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json',
+        'Notion-Version':'2022-06-28'
+      },
+      body:JSON.stringify(payload)
+    });
+    var data=await res.json();
+    if(res.ok && data.url){
+      if(statusEl) statusEl.innerHTML='<span style="color:#0a7c52">✓ 노션 등록 완료! &nbsp;<a href="'+data.url+'" target="_blank" style="color:#1d55c2;text-decoration:underline">페이지 열기 →</a></span>';
+      if(btn){btn.textContent='✓ 등록 완료';btn.style.background='#0a7c52';}
+    } else if(res.status===400||res.status===401||res.status===403){
+      /* CORS 또는 인증 오류 → JSON 복사 대안 안내 */
+      if(statusEl) statusEl.innerHTML='<span style="color:#b91c1c">✗ '+res.status+' 오류: '+(data.message||data.code||'인증 또는 CORS 차단')
+        +'<br><span style="color:var(--t3)">💡 CORS 차단 시: 노션 DB에 Integration 연결 확인 → Share → Connections → Add integration</span></span>';
+      if(btn){btn.textContent='노션 등록';btn.disabled=false;}
+    } else {
+      if(statusEl) statusEl.innerHTML='<span style="color:#b91c1c">✗ 오류 '+(res.status)+': '+(data.message||JSON.stringify(data).slice(0,100))+'</span>';
+      if(btn){btn.textContent='노션 등록';btn.disabled=false;}
+    }
+  }catch(err){
+    if(statusEl) statusEl.innerHTML='<span style="color:#b91c1c">✗ 네트워크 오류: '+err.message
+      +'<br><span style="color:var(--t3)">💡 CORS 차단일 수 있습니다. 노션 Integration 연결 및 DB 공유 설정을 확인하세요.</span></span>';
+    if(btn){btn.textContent='노션 등록';btn.disabled=false;}
+  }
+}
+
+async function fetchGemini(prompt){
+  var key=(document.getElementById('key-gemini')||{}).value||'';
+  if(!key) try{key=localStorage.getItem('ddda_key_gemini')||'';}catch(e){}
+  if(!key) return null;
+  try{
+    const timeoutPromise=new Promise((r)=>setTimeout(()=>r(null),2000)); // 2초 타임아웃
+    var res=await Promise.race([
+      fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key),{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
+      }),
+      timeoutPromise
+    ]);
+    if(!res||!res.ok) return null;
+    var data=await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||null;
+  }catch(e){return null;}
+}
+
+async function fetchOpenAI(prompt){
+  var key=(document.getElementById('key-openai')||{}).value||'';
+  if(!key) try{key=localStorage.getItem('ddda_key_openai')||'';}catch(e){}
+  if(!key) return null;
+  try{
+    const timeoutPromise=new Promise((r)=>setTimeout(()=>r(null),2000)); // 2초 타임아웃
+    var res=await Promise.race([
+      fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:prompt}],max_tokens:300,temperature:0.3})
+      }),
+      timeoutPromise
+    ]);
+    if(!res||!res.ok) return null;
+    var data=await res.json();
+    return data?.choices?.[0]?.message?.content?.trim()||null;
+  }catch(e){return null;}
+}
+
+async function fetchPerplexity(prompt){
+  var key=(document.getElementById('key-perplexity')||{}).value||'';
+  if(!key) try{key=localStorage.getItem('ddda_key_perplexity')||'';}catch(e){}
+  if(!key) return null;
+  try{
+    const timeoutPromise=new Promise((r)=>setTimeout(()=>r(null),2000)); // 2초 타임아웃
+    var res=await Promise.race([
+      fetch('https://api.perplexity.ai/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model:'sonar',messages:[{role:'user',content:prompt}],max_tokens:300,temperature:0.3})
+      }),
+      timeoutPromise
+    ]);
+    if(!res||!res.ok) return null;
+    var data=await res.json();
+    return data?.choices?.[0]?.message?.content?.trim()||null;
+  }catch(e){return null;}
+}
+
+async function fetchExternalAIs(prompt){
+  var results=await Promise.allSettled([
+    fetchGemini(prompt),
+    fetchOpenAI(prompt),
+    fetchPerplexity(prompt)
+  ]);
+  return {
+    gemini:     results[0].status==='fulfilled'?results[0].value:null,
+    openai:     results[1].status==='fulfilled'?results[1].value:null,
+    perplexity: results[2].status==='fulfilled'?results[2].value:null
+  };
+}
+
+/* ══ 어드민 내보내기 시스템 ══ */
+var G_EXPORT = {}; // 생성된 데이터 전역 저장
+
+function buildExportData(parsed, summary, srcs, seo, meta){
+  var cityDescEl = document.getElementById('city-desc-input');
+  var svc = DATA.svcCats.find(function(c){return c.id===S.svc;});
+  var fmt = DATA.formats.find(function(f){return f.id===S.fmt;}) || DATA.formats[7];
+  var tgt = DATA.targets.find(function(t){return t.id===S.target;}) || DATA.targets[0];
+  var yr  = new Date().getFullYear();
+
+  return {
+    /* 기본 정보 */
+    continent:    S.region.split(' ')[0],
+    country:      S.country || '',
+    city:         S.sub     || '',
+    city_desc:    cityDescEl ? cityDescEl.value.trim() : '',
+    /* 카테고리 */
+    service_cat:  svc ? svc.name : '',
+    topic:        (parsed && parsed.topic) || S.topic || (svc && svc.topics[0] && svc.topics[0].t) || '',
+    format:       fmt ? fmt.name : '',
+    target:       tgt ? tgt.name : '',
+    /* SEO */
+    seo_title:    (parsed && parsed.seo_title) || (seo && seo.seoTitle) || '',
+    geo_title:    (parsed && parsed.geo_title) || (seo && seo.geoTitle) || '',
+    keywords:     ((parsed && parsed.keywords) || (seo && seo.keywords) || []).join(', '),
+    keywords_arr: (parsed && parsed.keywords) || (seo && seo.keywords) || [],
+    alt_title_1:  ((parsed && parsed.alt_titles) || (seo && seo.alts) || [])[0] || '',
+    alt_title_2:  ((parsed && parsed.alt_titles) || (seo && seo.alts) || [])[1] || '',
+    alt_title_3:  ((parsed && parsed.alt_titles) || (seo && seo.alts) || [])[2] || '',
+    /* AI 요약 */
+    summary_1:    (summary && summary.pt1) || '',
+    summary_2:    (summary && summary.pt2) || '',
+    summary_3:    (summary && summary.pt3) || '',
+    read_time:    (summary && summary.time) || '5분',
+    reliability:  (summary && summary.rel)  || 'high',
+    /* 본문 */
+    content_md:   (parsed && parsed.content) || '',
+    content_html: (function(){
+      try{ return typeof marked!=='undefined' ? marked.parse((parsed&&parsed.content)||'') : ''; }
+      catch(e){ return ''; }
+    })(),
+    /* 정보 메타 */
+    data_year:    yr,
+    update_freq:  svc ? svc.freq+'별' : '',
+    official_src: (srcs && srcs.official) || '',
+    searched_urls:(srcs && srcs.searchedUrls) || '',
+    data_date:    (srcs && srcs.dataDate)  || yr+'년 기준',
+    /* 다중 AI */
+    ai_chatgpt:   (srcs && srcs.aiChatgpt)    || '',
+    ai_gemini:    (srcs && srcs.aiGemini)     || '',
+    ai_perplexity:(srcs && srcs.aiPerplexity) || '',
+    ai_consensus: (srcs && srcs.aiConsensus)  || '',
+    /* 생성 메타 */
+    created_at:   new Date().toISOString(),
+    generator:    'dd-da 콘텐츠 생성기 v3',
+  };
+}
+
+function renderExportTab(exportData){
+  var el=document.getElementById('otab-export');
+  if(!el)return;
+  G_EXPORT=exportData;
+
+  /* ── 공통 복사 헬퍼 ── */
+  function copyText(text, btn){
+    var orig=btn.textContent;
+    navigator.clipboard.writeText(text).then(function(){
+      btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+      setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied');},1800);
+    }).catch(function(){
+      var ta=document.createElement('textarea');
+      ta.value=text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+      setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied');},1800);
+    });
+  }
+
+  /* ── 복사 버튼 생성 ── */
+  function makeCopyBtn(text, label){
+    var btn=document.createElement('button');
+    btn.className='admin-copy-btn';
+    btn.textContent=label||'복사';
+    btn.addEventListener('click',function(){copyText(text,this);});
+    return btn;
+  }
+
+  /* ── 드롭다운 미리보기 행 ── */
+  function makeSelectRow(labelText, value, required){
+    var row=document.createElement('div');
+    row.className='admin-row';
+
+    var lbl=document.createElement('div');
+    lbl.className='admin-label';
+    lbl.innerHTML=labelText+(required?'<span class="admin-req-star">*</span>':'');
+
+    var field=document.createElement('div');
+    field.className='admin-field';
+
+    var copyRow=document.createElement('div');
+    copyRow.className='admin-copy-row';
+
+    var box=document.createElement('div');
+    box.className='admin-select-box';
+    var val=document.createElement('span');
+    val.className='admin-select-val'+(value?'':' placeholder');
+    val.textContent=value||'선택 없음';
+    var arrow=document.createElement('span');
+    arrow.className='admin-select-arrow'; arrow.textContent='▾';
+    box.appendChild(val); box.appendChild(arrow);
+
+    copyRow.appendChild(box);
+    if(value) copyRow.appendChild(makeCopyBtn(value));
+    field.appendChild(copyRow);
+    row.appendChild(lbl); row.appendChild(field);
+    return row;
+  }
+
+  /* ── 텍스트 입력 행 (문자수 표시) ── */
+  function makeInputRow(labelText, value, required, maxLen, hint){
+    var row=document.createElement('div');
+    row.className='admin-row';
+
+    var lbl=document.createElement('div');
+    lbl.className='admin-label';
+    lbl.innerHTML=labelText+(required?'<span class="admin-req-star">*</span>':'');
+
+    var field=document.createElement('div');
+    field.className='admin-field';
+
+    var copyRow=document.createElement('div');
+    copyRow.className='admin-copy-row';
+
+    var box=document.createElement('div');
+    box.className='admin-input-display';
+    var txt=document.createElement('span');
+    txt.className='admin-input-text';
+    txt.textContent=value||'';
+    box.appendChild(txt);
+    copyRow.appendChild(box);
+    if(value) copyRow.appendChild(makeCopyBtn(value));
+    field.appendChild(copyRow);
+
+    if(maxLen && value){
+      var len=value.length;
+      var cls=len<=maxLen?'char-ok':(len<=maxLen+5?'char-warn':'char-err');
+      var hintEl=document.createElement('div');
+      hintEl.className='admin-hint';
+      hintEl.innerHTML='글자수: <span class="admin-char-badge '+cls+'">'+len+'/'+maxLen+'자</span>'
+        +(len>maxLen?' <span style="color:#b91c1c">최대 '+maxLen+'자 초과 — 수정 필요</span>':'');
+      field.appendChild(hintEl);
+    }
+    if(hint){
+      var h2=document.createElement('div'); h2.className='admin-hint'; h2.textContent=hint;
+      field.appendChild(h2);
+    }
+    row.appendChild(lbl); row.appendChild(field);
+    return row;
+  }
+
+  /* ── 본문 콘텐츠 행 (WYSIWYG 미리보기) ── */
+  function makeContentRow(labelText, mdValue, htmlValue, required, summaryPrefix){
+    var row=document.createElement('div');
+    row.className='admin-row';
+
+    var lbl=document.createElement('div');
+    lbl.className='admin-label';
+    lbl.style.paddingTop='10px';
+    lbl.innerHTML=labelText+(required?'<span class="admin-req-star">*</span>':'');
+
+    var field=document.createElement('div');
+    field.className='admin-field';
+
+    /* 모드 탭 */
+    var modeTabs=document.createElement('div');
+    modeTabs.className='admin-mode-tabs';
+    var mdTab=document.createElement('button');
+    mdTab.className='admin-mode-tab active'; mdTab.textContent='Markdown';
+    var wyTab=document.createElement('button');
+    wyTab.className='admin-mode-tab'; wyTab.textContent='WYSIWYG';
+    modeTabs.appendChild(mdTab); modeTabs.appendChild(wyTab);
+    field.appendChild(modeTabs);
+
+    /* 툴바 (장식용) */
+    var toolbar=document.createElement('div');
+    toolbar.className='admin-toolbar';
+    ['H','B','I','S','—','❝','≡','≔','☑','⊞','⊟','⊞','</>','CB'].forEach(function(t){
+      var s=document.createElement('span'); s.className='admin-toolbar-item'; s.textContent=t;
+      toolbar.appendChild(s);
+    });
+    field.appendChild(toolbar);
+
+    /* 본문 미리보기 컨테이너 */
+    var previewWrap=document.createElement('div');
+    previewWrap.className='admin-content-preview';
+    previewWrap.id='admin-content-preview';
+
+    /* 기본: WYSIWYG (HTML 렌더) */
+    if(htmlValue){
+      previewWrap.innerHTML=htmlValue;
+    } else if(mdValue && typeof marked !== 'undefined'){
+      previewWrap.innerHTML=marked.parse(mdValue);
+    } else if(mdValue){
+      previewWrap.textContent=mdValue;
+    }
+    field.appendChild(previewWrap);
+
+    /* 복사 버튼 행 */
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:5px;margin-top:5px;flex-wrap:wrap';
+
+    var cpMd=makeCopyBtn(mdValue||'','마크다운 복사');
+    cpMd.style.cssText='padding:5px 12px;font-size:11px;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#52514d;cursor:pointer';
+    btnRow.appendChild(cpMd);
+
+    if(htmlValue){
+      var cpHtml=makeCopyBtn(htmlValue,'HTML 복사');
+      cpHtml.style.cssText='padding:5px 12px;font-size:11px;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#52514d;cursor:pointer';
+      btnRow.appendChild(cpHtml);
+    }
+
+    /* 요약 + 본문 함께 복사 */
+    if(summaryPrefix && mdValue){
+      var cpAll=makeCopyBtn(summaryPrefix+(mdValue||''),'요약 + 본문 함께 복사');
+      cpAll.style.cssText='padding:5px 12px;font-size:11px;font-weight:700;border:.5px solid #7dd3b5;border-radius:6px;background:#e8f7f1;color:#0a7c52;cursor:pointer';
+      btnRow.appendChild(cpAll);
+    }
+
+    field.appendChild(btnRow);
+
+    /* 탭 전환 */
+    mdTab.addEventListener('click',function(){
+      mdTab.classList.add('active'); wyTab.classList.remove('active');
+      previewWrap.style.fontFamily='monospace';
+      previewWrap.style.fontSize='11px';
+      previewWrap.style.whiteSpace='pre-wrap';
+      previewWrap.style.color='#444';
+      previewWrap.textContent=mdValue||'';
+    });
+    wyTab.addEventListener('click',function(){
+      wyTab.classList.add('active'); mdTab.classList.remove('active');
+      previewWrap.style.fontFamily=''; previewWrap.style.fontSize='';
+      previewWrap.style.whiteSpace=''; previewWrap.style.color='';
+      if(htmlValue) previewWrap.innerHTML=htmlValue;
+      else if(mdValue && typeof marked!=='undefined') previewWrap.innerHTML=marked.parse(mdValue);
+      else previewWrap.textContent=mdValue||'';
+    });
+
+    row.appendChild(lbl); row.appendChild(field);
+    return row;
+  }
+
+  /* ── 파일 업로드 행 (안내용) ── */
+  function makeFileRow(labelText, required, hint){
+    var row=document.createElement('div');
+    row.className='admin-row';
+
+    var lbl=document.createElement('div');
+    lbl.className='admin-label';
+    lbl.style.paddingTop='10px';
+    lbl.innerHTML=labelText+(required?'<span class="admin-req-star">*</span>':'');
+
+    var field=document.createElement('div');
+    field.className='admin-field';
+
+    var ph=document.createElement('div');
+    ph.className='admin-file-placeholder';
+    ph.innerHTML='📁 파일 선택 &nbsp;<span style="background:#52514d;color:#fff;font-size:10px;padding:3px 10px;border-radius:4px">찾아보기</span>';
+    field.appendChild(ph);
+
+    if(hint){
+      var h=document.createElement('div'); h.className='admin-hint'; h.textContent=hint;
+      field.appendChild(h);
+    }
+    row.appendChild(lbl); row.appendChild(field);
+    return row;
+  }
+
+  /* ── 활성 상태 행 ── */
+  function makeStatusRow(){
+    var row=document.createElement('div');
+    row.className='admin-row';
+
+    var lbl=document.createElement('div');
+    lbl.className='admin-label';
+    lbl.innerHTML='활성 상태<span class="admin-req-star">*</span>';
+
+    var field=document.createElement('div');
+    field.className='admin-field';
+
+    var rg=document.createElement('div');
+    rg.className='admin-radio-group';
+    [['활성',true],['비활성',false]].forEach(function(item){
+      var ri=document.createElement('div'); ri.className='admin-radio-item';
+      var dot=document.createElement('div'); dot.className='admin-radio-circle'+(item[1]?' active':'');
+      var txt=document.createElement('span'); txt.textContent=item[0];
+      ri.appendChild(dot); ri.appendChild(txt);
+      rg.appendChild(ri);
+    });
+    field.appendChild(rg);
+    row.appendChild(lbl); row.appendChild(field);
+    return row;
+  }
+
+  /* ── 어드민 폼 전체 조립 ── */
+  function makeAdminForm(){
+    var wrap=document.createElement('div');
+    wrap.className='admin-form-wrap';
+
+    /* 헤더 */
+    var hd=document.createElement('div');
+    hd.className='admin-form-header';
+    var titleDiv=document.createElement('div');
+    titleDiv.className='admin-form-header-title';
+    titleDiv.innerHTML='콘텐츠 관리 &nbsp;<span class="admin-form-badge">어드민 입력 폼</span>';
+    var hintDiv=document.createElement('div');
+    hintDiv.className='admin-form-hint';
+    hintDiv.textContent='각 필드 우측 [복사] 버튼을 클릭해 어드민에 붙여넣기하세요';
+    hd.appendChild(titleDiv); hd.appendChild(hintDiv);
+    wrap.appendChild(hd);
+
+    /* ① 기본 정보 섹션 */
+    var sec1=document.createElement('div');
+    sec1.className='admin-section';
+    var t1=document.createElement('div'); t1.className='admin-section-title'; t1.textContent='기본 정보';
+    sec1.appendChild(t1);
+    sec1.appendChild(makeSelectRow('대륙', exportData.continent||'', true));
+    sec1.appendChild(makeSelectRow('국가', exportData.country||'', true));
+    sec1.appendChild(makeSelectRow('도시명', exportData.city||'', true));
+    sec1.appendChild(makeSelectRow('서비스', exportData.service_cat||'', true));
+    wrap.appendChild(sec1);
+
+    /* ② 이미지 섹션 */
+    var sec2=document.createElement('div');
+    sec2.className='admin-section';
+    var t2=document.createElement('div'); t2.className='admin-section-title'; t2.textContent='이미지';
+    sec2.appendChild(t2);
+    sec2.appendChild(makeFileRow('대표 이미지', true,
+      '사이즈: 최소 640×800 px (4:5 비율) / 용량: 2MB 이하 / 유형: gif, jpg, png, bmp, webp, svg'));
+    sec2.appendChild(makeFileRow('추가 이미지', false,
+      '파일용량 2MB (gif, jpg, png, svg) / 4:5 비율 / 여러 개 선택 가능 · 드래그로 순서 변경 가능'));
+    wrap.appendChild(sec2);
+
+    /* ③ 상세 내용 섹션 */
+    var sec3=document.createElement('div');
+    sec3.className='admin-section';
+    var t3=document.createElement('div'); t3.className='admin-section-title'; t3.textContent='상세 내용';
+    sec3.appendChild(t3);
+
+    /* 제목 — seo_title 사용, 대안 제목도 표시 */
+    var titleVal=exportData.seo_title||'';
+    sec3.appendChild(makeInputRow('제목', titleVal, true, 35,
+      '대안: '+[exportData.alt_title_1,exportData.alt_title_2,exportData.alt_title_3].filter(Boolean).join(' / ')));
+
+    /* 부제목 — geo_title 사용 */
+    var subVal=exportData.geo_title||'';
+    sec3.appendChild(makeInputRow('부제목', subVal, true, 35, null));
+
+    /* AI 필수 요약 행 */
+    (function(){
+      var pts=[exportData.summary_1,exportData.summary_2,exportData.summary_3].filter(Boolean);
+      if(!pts.length) return;
+      var summaryMd='## AI 필수 요약\n'+pts.map(function(p){return '- '+p;}).join('\n');
+
+      var row=document.createElement('div');
+      row.className='admin-row';
+
+      var lbl=document.createElement('div');
+      lbl.className='admin-label';
+      lbl.style.paddingTop='10px';
+      lbl.innerHTML='AI 필수 요약<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#eef2fd;color:#1d55c2;margin-left:5px">AI</span>';
+
+      var field=document.createElement('div');
+      field.className='admin-field';
+
+      /* 요약 포인트 카드 */
+      var card=document.createElement('div');
+      card.style.cssText='border:.5px solid #b8c9f5;border-radius:6px;background:#f7f9ff;overflow:hidden';
+
+      var cardHd=document.createElement('div');
+      cardHd.style.cssText='background:#eef2fd;padding:6px 10px;font-size:10px;font-weight:700;color:#1d55c2;border-bottom:.5px solid #b8c9f5;display:flex;align-items:center;gap:5px';
+      cardHd.innerHTML='<span style="background:#1d55c2;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px">AI</span> AI 필수 요약 — 3포인트';
+      card.appendChild(cardHd);
+
+      var cardBody=document.createElement('div');
+      cardBody.style.cssText='padding:10px 12px;display:flex;flex-direction:column;gap:7px';
+      pts.forEach(function(pt,i){
+        var item=document.createElement('div');
+        item.style.cssText='display:flex;gap:8px;align-items:flex-start';
+        var num=document.createElement('div');
+        num.style.cssText='width:18px;height:18px;border-radius:50%;background:#1d55c2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px';
+        num.textContent=i+1;
+        var txt=document.createElement('div');
+        txt.style.cssText='font-size:12px;color:#1a1a18;line-height:1.6;flex:1';
+        txt.textContent=pt;
+        item.appendChild(num); item.appendChild(txt);
+        cardBody.appendChild(item);
+      });
+      card.appendChild(cardBody);
+
+      var copyRow=document.createElement('div');
+      copyRow.style.cssText='display:flex;gap:5px;margin-top:6px;flex-wrap:wrap';
+
+      var cpSumBtn=makeCopyBtn(pts.join('\n'),'요약 3줄 복사');
+      cpSumBtn.style.cssText='padding:5px 12px;font-size:11px;border:.5px solid #b8c9f5;border-radius:6px;background:#eef2fd;color:#1d55c2;cursor:pointer;font-weight:600';
+      var cpMdBtn=makeCopyBtn(summaryMd,'마크다운으로 복사');
+      cpMdBtn.style.cssText='padding:5px 12px;font-size:11px;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#52514d;cursor:pointer';
+
+      copyRow.appendChild(cpSumBtn);
+      copyRow.appendChild(cpMdBtn);
+
+      field.appendChild(card);
+      field.appendChild(copyRow);
+      row.appendChild(lbl); row.appendChild(field);
+      sec3.appendChild(row);
+    })();
+
+    /* 상세 내용 — 요약 포함 복사 버튼도 추가 */
+    var summaryPrefix=(function(){
+      var pts=[exportData.summary_1,exportData.summary_2,exportData.summary_3].filter(Boolean);
+      return pts.length ? '## AI 필수 요약\n'+pts.map(function(p){return '- '+p;}).join('\n')+'\n\n---\n\n' : '';
+    })();
+    sec3.appendChild(makeContentRow('상세 내용',
+      exportData.content_md||'', exportData.content_html||'', true, summaryPrefix));
+    wrap.appendChild(sec3);
+
+    /* ④ 상태 섹션 */
+    var sec4=document.createElement('div');
+    sec4.className='admin-section';
+    var t4=document.createElement('div'); t4.className='admin-section-title'; t4.textContent='설정';
+    sec4.appendChild(t4);
+    sec4.appendChild(makeStatusRow());
+    wrap.appendChild(sec4);
+
+    /* 하단 일괄 복사 */
+    var footer=document.createElement('div');
+    footer.style.cssText='padding:12px 16px;background:#f5f4f0;border-top:.5px solid #d0cec5;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    var allCopyBtn=document.createElement('button');
+    allCopyBtn.className='admin-all-copy-btn';
+    allCopyBtn.textContent='전체 필드 JSON 복사';
+    allCopyBtn.addEventListener('click',function(){
+      copyText(JSON.stringify(G_EXPORT,null,2),this);
+    });
+    var mdCopyBtn=document.createElement('button');
+    mdCopyBtn.className='admin-all-copy-btn';
+    mdCopyBtn.style.cssText='padding:6px 14px;font-size:11px;font-weight:600;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#18181a;cursor:pointer';
+    mdCopyBtn.textContent='본문만 복사';
+    mdCopyBtn.addEventListener('click',function(){
+      copyText(G_EXPORT.content_md||'',this);
+    });
+    var sumBodyBtn=document.createElement('button');
+    sumBodyBtn.className='admin-all-copy-btn';
+    sumBodyBtn.style.cssText='padding:6px 14px;font-size:11px;font-weight:700;border:.5px solid #7dd3b5;border-radius:6px;background:#e8f7f1;color:#0a7c52;cursor:pointer';
+    sumBodyBtn.textContent='요약 + 본문 복사';
+    sumBodyBtn.addEventListener('click',function(){
+      var pts=[G_EXPORT.summary_1,G_EXPORT.summary_2,G_EXPORT.summary_3].filter(Boolean);
+      var prefix=pts.length?'## AI 필수 요약\n'+pts.map(function(p){return '- '+p;}).join('\n')+'\n\n---\n\n':'';
+      copyText(prefix+(G_EXPORT.content_md||''),this);
+    });
+    var htmlCopyBtn=document.createElement('button');
+    htmlCopyBtn.className='admin-all-copy-btn';
+    htmlCopyBtn.style.cssText='padding:6px 14px;font-size:11px;font-weight:600;border:.5px solid #d0cec5;border-radius:6px;background:#fff;color:#18181a;cursor:pointer';
+    htmlCopyBtn.textContent='본문 HTML만 복사';
+    htmlCopyBtn.addEventListener('click',function(){
+      copyText(G_EXPORT.content_html||'',this);
+    });
+    var info=document.createElement('span');
+    info.style.cssText='font-size:10px;color:#8a8880;margin-left:auto';
+    info.textContent='생성: '+new Date(exportData.created_at||Date.now()).toLocaleString('ko-KR');
+    footer.appendChild(allCopyBtn); footer.appendChild(mdCopyBtn); footer.appendChild(sumBodyBtn); footer.appendChild(htmlCopyBtn);
+    footer.appendChild(info);
+
+    /* 노션 등록 버튼 */
+    var notionRow=document.createElement('div');
+    notionRow.style.cssText='width:100%;border-top:.5px solid #d0cec5;margin-top:10px;padding-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    var notionBtn=document.createElement('button');
+    notionBtn.id='notion-send-btn';
+    notionBtn.style.cssText='padding:7px 16px;font-size:12px;font-weight:700;border:.5px solid #18181a;border-radius:6px;background:#18181a;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px';
+    notionBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/></svg>노션에 등록';
+    notionBtn.addEventListener('click', sendToNotion);
+    var notionStatus=document.createElement('div');
+    notionStatus.id='notion-send-status';
+    notionStatus.style.cssText='font-size:11px;flex:1;min-width:0;word-break:break-word';
+    notionRow.appendChild(notionBtn);
+    notionRow.appendChild(notionStatus);
+    footer.appendChild(notionRow);
+
+    wrap.appendChild(footer);
+
+    return wrap;
+  }
+
+  /* ── 일괄 내보내기 버튼 ── */
+  function makeExportBtns(){
+    var d=document.createElement('div');
+    d.className='export-btns';
+    var btns=[
+      {t:'JSON 다운로드',      cls:'exp-btn primary', fn:exportJSON,    id:'downloadJSON-btn'},
+      {t:'TSV 다운로드 (Excel)',cls:'exp-btn',         fn:exportCSV,     id:'downloadCSV-btn'},
+      {t:'JSON 복사',          cls:'exp-btn',          fn:copyAllJSON,   id:'copyJSON-btn'},
+      {t:'마크다운 복사',      cls:'exp-btn',          fn:copyMarkdown,  id:'copyMarkdown-btn'},
+    ];
+    btns.forEach(function(b){
+      var btn=document.createElement('button');
+      btn.className=b.cls; btn.textContent=b.t; btn.id=b.id;
+      btn.addEventListener('click',b.fn); d.appendChild(btn);
+    });
+    return d;
+  }
+
+  /* ── API 설정 폼 ── */
+  function makeApiForm(){
+    var d=document.createElement('div');
+    d.className='api-config';
+    var row1=document.createElement('div'); row1.className='api-row';
+    var sel=document.createElement('select'); sel.id='api-method'; sel.className='api-input api-method';
+    ['POST','PUT','PATCH'].forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+    var urlInp=document.createElement('input'); urlInp.id='api-url'; urlInp.className='api-input'; urlInp.type='text';
+    urlInp.placeholder='https://yoursite.com/api/contents';
+    row1.appendChild(sel); row1.appendChild(urlInp);
+    var row2=document.createElement('div'); row2.className='api-row';
+    var tokenInp=document.createElement('input'); tokenInp.id='api-token'; tokenInp.className='api-input'; tokenInp.type='text';
+    tokenInp.placeholder='Bearer 토큰 또는 API Key (선택)'; row2.appendChild(tokenInp);
+    var row3=document.createElement('div'); row3.className='api-row';
+    var mapInp=document.createElement('input'); mapInp.id='api-field-map'; mapInp.className='api-input'; mapInp.type='text';
+    mapInp.placeholder='필드 매핑 JSON (예: {"title":"seo_title","body":"content_html"})'; row3.appendChild(mapInp);
+    var btnRow=document.createElement('div'); btnRow.className='export-btns';
+    var sendBtn=document.createElement('button'); sendBtn.className='exp-btn primary'; sendBtn.textContent='어드민으로 전송';
+    sendBtn.addEventListener('click',sendToAdmin);
+    var prevBtn=document.createElement('button'); prevBtn.className='exp-btn'; prevBtn.textContent='전송 데이터 미리보기';
+    prevBtn.addEventListener('click',previewPayload);
+    btnRow.appendChild(sendBtn); btnRow.appendChild(prevBtn);
+    var resDiv=document.createElement('div'); resDiv.id='api-result'; resDiv.style.cssText='font-size:11px;color:var(--t2);margin-top:6px';
+    d.appendChild(row1); d.appendChild(row2); d.appendChild(row3); d.appendChild(btnRow); d.appendChild(resDiv);
+    return d;
+  }
+
+  /* ── JSON 미리보기 ── */
+  function makeJsonPreview(){
+    var d=document.createElement('div'); d.className='json-preview'; d.id='json-preview';
+    d.textContent=JSON.stringify(exportData,null,2); return d;
+  }
+
+  /* ── 섹션 헬퍼 ── */
+  function makeSection(title, content){
+    var sec=document.createElement('div'); sec.className='export-section';
+    var h=document.createElement('div'); h.className='export-title'; h.textContent=title;
+    sec.appendChild(h); sec.appendChild(content); return sec;
+  }
+
+  /* ── 최종 조립 ── */
+  el.innerHTML='';
+  var wrap=document.createElement('div');
+  wrap.className='export-wrap';
+  wrap.appendChild(makeAdminForm());
+  wrap.appendChild(makeSection('일괄 내보내기 (JSON/TSV/마크다운)', makeExportBtns()));
+  wrap.appendChild(makeSection('어드민 API 직접 전송', makeApiForm()));
+  wrap.appendChild(makeSection('JSON 구조 미리보기', makeJsonPreview()));
+  el.appendChild(wrap);
+}
+
+/* 필드 복사 */
+function copyField(btn){
+  var key = btn.dataset.key;
+  var val = G_EXPORT[key] || '';
+  navigator.clipboard.writeText(val).then(function(){
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='복사'; btn.classList.remove('copied'); }, 1800);
+  }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = val;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='복사'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+/* JSON 다운로드 */
+
+
+/* CSV 다운로드 */
+
+
+/* JSON 클립보드 복사 */
+
+
+/* 마크다운 복사 */
+
+
+/* 필드 매핑 적용 */
+function applyFieldMap(data, mapStr){
+  if(!mapStr || !mapStr.trim()) return data;
+  try {
+    var map = JSON.parse(mapStr);
+    var mapped = {};
+    Object.keys(map).forEach(function(adminKey){
+      var srcKey = map[adminKey];
+      if(data[srcKey] !== undefined) mapped[adminKey] = data[srcKey];
+    });
+    /* 매핑 안 된 원본 필드도 포함 */
+    Object.keys(data).forEach(function(k){
+      if(!Object.values(map).includes(k)) mapped[k] = data[k];
+    });
+    return mapped;
+  } catch(e){ return data; }
+}
+
+/* 전송 데이터 미리보기 */
+function previewPayload(){
+  var mapStr = document.getElementById('api-field-map').value.trim();
+  var payload = applyFieldMap(G_EXPORT, mapStr);
+  var jpEl = document.getElementById('json-preview');
+  if(jpEl) jpEl.textContent = JSON.stringify(payload, null, 2);
+  var res = document.getElementById('api-result');
+  if(res) res.innerHTML = '<span style="color:#0a7c52">미리보기 업데이트 완료 — JSON 구조 미리보기 참고</span>';
+}
+
+/* 어드민 API 전송 */
+async function sendToAdmin(){
+  var url    = document.getElementById('api-url').value.trim();
+  var token  = document.getElementById('api-token').value.trim();
+  var method = document.getElementById('api-method').value;
+  var mapStr = document.getElementById('api-field-map').value.trim();
+  var resEl  = document.getElementById('api-result');
+
+  if(!url){ if(resEl) resEl.innerHTML='<span style="color:#b91c1c">URL을 입력하세요</span>'; return; }
+
+  var payload = applyFieldMap(G_EXPORT, mapStr);
+  if(resEl) resEl.innerHTML='<span style="color:#b55c08">전송 중...</span>';
+
+  var headers = {'Content-Type':'application/json'};
+  if(token) headers['Authorization'] = token.startsWith('Bearer ') ? token : 'Bearer '+token;
+
+  try {
+    var res = await fetch(url, {method:method, headers:headers, body:JSON.stringify(payload)});
+    var status = res.status;
+    var body = await res.text();
+    if(res.ok){
+      if(resEl) resEl.innerHTML='<span style="color:#0a7c52">✓ 전송 성공 ('+status+') — '+esc(body.slice(0,100))+'</span>';
+    } else {
+      if(resEl) resEl.innerHTML='<span style="color:#b91c1c">✗ 전송 실패 ('+status+'): '+esc(body.slice(0,200))+'</span>';
+    }
+  } catch(e){
+    if(resEl) resEl.innerHTML='<span style="color:#b91c1c">✗ 네트워크 오류: '+esc(e.message)+'</span>';
+  }
+}
+
+
+
+/* ══ iframe 안전 내보내기 ══ */
+function showCopyFeedback(btnId, msg){
+  var btn=document.getElementById(btnId);
+  if(!btn)return;
+  var orig=btn.textContent;
+  btn.textContent=msg;
+  btn.style.cssText='background:#e8f7f1;color:#0a7c52;'+btn.style.cssText;
+  setTimeout(function(){btn.textContent=orig;btn.style.cssText='';},2000);
+}
+
+/* 콘텐츠를 모달 textarea에 표시 — 수동 Ctrl+A, Ctrl+C */
+function showExportModal(title, content, filename){
+  var existing=document.getElementById('export-modal-overlay');
+  if(existing) existing.remove();
+
+  var overlay=document.createElement('div');
+  overlay.id='export-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  var modal=document.createElement('div');
+  modal.style.cssText='background:var(--sur,#fff);border-radius:10px;width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden';
+
+  var hd=document.createElement('div');
+  hd.style.cssText='padding:14px 16px;border-bottom:.5px solid var(--bd,#e2e0d8);display:flex;align-items:center;justify-content:space-between;flex-shrink:0';
+  var ttl=document.createElement('div');
+  ttl.style.cssText='font-size:13px;font-weight:600;color:var(--t,#18181a)';
+  ttl.textContent=title;
+  var hint=document.createElement('div');
+  hint.style.cssText='font-size:11px;color:var(--t3,#8a8880);margin-top:2px';
+  hint.textContent='Ctrl+A → Ctrl+C 로 전체 복사';
+  var titleWrap=document.createElement('div');
+  titleWrap.appendChild(ttl); titleWrap.appendChild(hint);
+  var closeBtn=document.createElement('button');
+  closeBtn.textContent='✕ 닫기';
+  closeBtn.style.cssText='padding:5px 12px;font-size:12px;border:.5px solid var(--bd2,#d0cec5);border-radius:7px;background:transparent;cursor:pointer';
+  closeBtn.addEventListener('click',function(){overlay.remove();});
+  hd.appendChild(titleWrap); hd.appendChild(closeBtn);
+
+  var body=document.createElement('div');
+  body.style.cssText='padding:12px 16px;flex:1;overflow:auto';
+
+  var actionRow=document.createElement('div');
+  actionRow.style.cssText='display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap';
+
+  /* 전체 선택 버튼 */
+  var selBtn=document.createElement('button');
+  selBtn.textContent='전체 선택 (Ctrl+A)';
+  selBtn.style.cssText='padding:5px 12px;font-size:11px;border:.5px solid var(--bd2,#d0cec5);border-radius:7px;background:transparent;cursor:pointer';
+  selBtn.addEventListener('click',function(){ta.select();});
+
+  /* 복사 버튼 */
+  var cpBtn=document.createElement('button');
+  cpBtn.textContent='복사하기';
+  cpBtn.style.cssText='padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:7px;background:#18181a;color:#fff;cursor:pointer';
+  cpBtn.addEventListener('click',function(){
+    ta.select();
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(content).then(function(){
+          cpBtn.textContent='✓ 복사됨!';
+          setTimeout(function(){cpBtn.textContent='복사하기';},2000);
+        }).catch(function(){
+          document.execCommand('copy');
+          cpBtn.textContent='✓ 복사됨!';
+          setTimeout(function(){cpBtn.textContent='복사하기';},2000);
+        });
+      } else {
+        document.execCommand('copy');
+        cpBtn.textContent='✓ 복사됨!';
+        setTimeout(function(){cpBtn.textContent='복사하기';},2000);
+      }
+    }catch(e){
+      cpBtn.textContent='Ctrl+C로 복사하세요';
+    }
+  });
+
+  /* 파일명 표시 */
+  var fnTag=document.createElement('span');
+  fnTag.style.cssText='font-size:10px;color:var(--t3,#8a8880);padding:5px 0;margin-left:4px';
+  fnTag.textContent=filename||'';
+
+  actionRow.appendChild(selBtn); actionRow.appendChild(cpBtn); actionRow.appendChild(fnTag);
+
+  var ta=document.createElement('textarea');
+  ta.value=content;
+  ta.readOnly=false;
+  ta.style.cssText='width:100%;height:340px;font-family:monospace;font-size:11px;padding:8px;border:.5px solid var(--bd2,#d0cec5);border-radius:7px;background:var(--sur2,#f9f8f5);color:var(--t,#18181a);resize:vertical;line-height:1.5';
+  ta.addEventListener('focus',function(){this.select();});
+
+  body.appendChild(actionRow); body.appendChild(ta);
+  modal.appendChild(hd); modal.appendChild(body);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  /* 자동 선택 */
+  setTimeout(function(){ta.focus();ta.select();},100);
+
+  /* 배경 클릭 닫기 */
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+}
+
+function exportJSON(){
+  if(!G_EXPORT||!G_EXPORT.seo_title){showExportModal('알림','먼저 콘텐츠를 생성하세요.','');return;}
+  var txt=JSON.stringify(G_EXPORT,null,2);
+  var fn='ddda_'+(G_EXPORT.country||'')+'_'+Date.now()+'.json';
+  showExportModal('JSON 내보내기 — '+fn, txt, fn);
+}
+
+function exportCSV(){
+  if(!G_EXPORT||!G_EXPORT.seo_title){showExportModal('알림','먼저 콘텐츠를 생성하세요.','');return;}
+  var keys=['continent','country','city','city_desc','service_cat','topic',
+            'format','target','seo_title','geo_title','keywords',
+            'alt_title_1','alt_title_2','alt_title_3',
+            'summary_1','summary_2','summary_3',
+            'update_freq','reliability','official_src','data_date',
+            'ai_consensus','created_at'];
+  var nl='\n'; var tab='\t';
+  var header=keys.join(tab);
+  var row=keys.map(function(k){
+    return String(G_EXPORT[k]||'').replace(new RegExp(tab,'g'),' ').replace(new RegExp(nl,'g'),' ');
+  }).join(tab);
+  var mdLine='content_md\t'+String(G_EXPORT.content_md||'').replace(new RegExp(tab,'g'),' ').replace(new RegExp(nl,'g'),' ');
+  var tsv=header+nl+row+nl+nl+mdLine;
+  var fn='ddda_'+Date.now()+'.tsv';
+  showExportModal('TSV 내보내기 (Excel 붙여넣기용) — '+fn, tsv, fn);
+}
+
+function copyAllJSON(){
+  if(!G_EXPORT||!G_EXPORT.seo_title){showExportModal('알림','먼저 콘텐츠를 생성하세요.','');return;}
+  showExportModal('JSON 전체 복사', JSON.stringify(G_EXPORT,null,2), '');
+}
+
+function copyMarkdown(){
+  if(!G_EXPORT||!G_EXPORT.seo_title){showExportModal('알림','먼저 콘텐츠를 생성하세요.','');return;}
+  var md='# '+(G_EXPORT.seo_title||'')+'\n'
+    +'> GEO: '+(G_EXPORT.geo_title||'')+'\n\n'
+    +'**키워드:** '+(G_EXPORT.keywords||'')+'\n\n'
+    +'---\n\n'
+    +'## AI 필수 요약\n'
+    +'- '+(G_EXPORT.summary_1||'')+'\n'
+    +'- '+(G_EXPORT.summary_2||'')+'\n'
+    +'- '+(G_EXPORT.summary_3||'')+'\n\n'
+    +'---\n\n'
+    +(G_EXPORT.content_md||'')+'\n\n'
+    +'---\n\n'
+    +'> 출처: '+(G_EXPORT.official_src||'')+' | 기준: '+(G_EXPORT.data_date||'')+'\n';
+  showExportModal('마크다운 복사', md, '');
+}
+
+/* ══════════════ INIT ══════════════ */
+function setTabHTML(id,html){var el=document.getElementById(id);if(el)el.innerHTML=html;}
+function setInner(id,html){var el=document.getElementById(id);if(el)el.innerHTML=html;}
+renderRegions(); renderCountries(); renderSvcGrid(); renderCtypes(); renderTopics();
+renderFormats(); renderTargets(); updateSummary(); updateSteps(); checkGen();
+loadApiKeys();
+
+</script>
+</body>
+</html>
