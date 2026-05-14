@@ -8,3 +8,6 @@
 
 ## 🚀 Design System
 👉 https://mplanitax-cyber.github.io/AI-LAB/designSystem_mplanit/design-system.html
+
+## 🚀 Notion
+👉 https://mplanitax-cyber.github.io/AI-LAB/MplanitAD/notion.html
