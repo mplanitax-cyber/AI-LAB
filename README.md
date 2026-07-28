@@ -11,3 +11,10 @@
 
 ## 🚀 Notion
 👉 https://mplanitax-cyber.github.io/AI-LAB/MplanitAD/notion.html
+
+## 🚀 CR_03.하반기계획안
+👉 https://mplanitax-cyber.github.io/AI-LAB/CR_03.2H_Plan_26_For_Presentation.html
+
+## 🚀 CRUX_평가가이드
+👉 https://mplanitax-cyber.github.io/AI-LAB/CRUX_Evaluation_Guide_For_PT.html
+
