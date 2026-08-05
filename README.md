@@ -17,4 +17,5 @@
 
 ## 🚀 CRUX_평가가이드
 👉 https://mplanitax-cyber.github.io/AI-LAB/CRUX_Evaluation_Guide_For_PT.html
+👉 https://mplanitax-cyber.github.io/AI-LAB/AIU_2026H2_CR_PT.html
 
