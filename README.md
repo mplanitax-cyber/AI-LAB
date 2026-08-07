@@ -7,7 +7,7 @@
 
 
 ## 🚀 Design System
-👉 https://mplanitax-cyber.github.io/design-Systems/MDS.html
+👉 https://design-systems-chi.vercel.app/#/overview
 
 ## 🚀 Notion
 👉 https://mplanitax-cyber.github.io/AI-LAB/MplanitAD/notion.html
